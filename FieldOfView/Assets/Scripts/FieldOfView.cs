@@ -5,12 +5,14 @@ using System.Collections.Generic;
 public class FieldOfView : MonoBehaviour
 {
 
+    
     public float viewRadius;
     [Range(0, 360)]
     public float viewAngle;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
+    public LayerMask viewMask;
 
     [HideInInspector]
     public List<Transform> visibleTargets = new List<Transform>();
@@ -21,15 +23,17 @@ public class FieldOfView : MonoBehaviour
 
     public MeshFilter viewMeshFilter;
     Mesh viewMesh;
-
     public Grid grid;
 
     void Start()
     {
+    
         viewMesh = new Mesh();
         viewMesh.name = "View Mesh";
         viewMeshFilter.mesh = viewMesh;
-
+        //meshCollider = GetComponent<MeshCollider>();
+        //meshCollider.sharedMesh = viewMesh;
+        
         StartCoroutine("FindTargetsWithDelay", .2f);
     }
 
@@ -46,6 +50,8 @@ public class FieldOfView : MonoBehaviour
     void LateUpdate()
     {
         DrawFieldOfView();
+
+        setSeen();
     }
 
     void FindVisibleTargets()
@@ -120,10 +126,14 @@ public class FieldOfView : MonoBehaviour
         }
 
         viewMesh.Clear();
-
         viewMesh.vertices = vertices;
         viewMesh.triangles = triangles;
         viewMesh.RecalculateNormals();
+
+        viewMesh.RecalculateBounds();
+        
+
+
     }
 
 
@@ -162,8 +172,26 @@ public class FieldOfView : MonoBehaviour
 
         if (Physics.Raycast(transform.position, dir, out hit, viewRadius, obstacleMask))
         {
-            Node node = grid.NodeFromWorldPoint(transform.position+(dir*hit.distance));
-            node.walkable = false; 
+           /* Vector3 center = transform.position + (dir * hit.distance);
+            foreach (Node n in grid.nodesInRadius(center, 1.0f))
+            {
+                if(n.danger < 1)
+                n.danger ++;
+            }
+            foreach (Node n in grid.nodesInRadius(center, 0.5f))
+            {
+                if (n.danger < 2)
+                    n.danger++;
+            }
+            Node node = grid.NodeFromWorldPoint(center);
+            if (node.danger < 3)
+                node.danger++;*/
+            /* Node node = grid.NodeFromWorldPoint(transform.position+(dir*hit.distance));
+             node.walkable = false; 
+             foreach(Node n in grid.nodesInRadius(transform.position + (dir * hit.distance), 0.7f))
+             {
+                 n.walkable = false;
+             }*/
             return new ViewCastInfo(true, hit.point, hit.distance, globalAngle);
         }
         else {
@@ -205,6 +233,46 @@ public class FieldOfView : MonoBehaviour
         {
             pointA = _pointA;
             pointB = _pointB;
+        }
+    }
+
+    public void setSeen() {
+        List<Node> nodes = grid.nodesInRadius(transform.position,viewRadius);
+        //print("nodesize: "+nodes.Count);
+        foreach (Node n in nodes)
+        {
+            Ray ray = new Ray(transform.position,n.worldPosition-transform.position);
+            RaycastHit hit;
+            if (Mathf.Abs(Vector3.Angle((n.worldPosition - transform.position), (transform.forward))) < viewAngle/2
+                     && Vector3.Distance(n.worldPosition, transform.position) < viewRadius)
+            {
+                //if (!Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), obstacleMask))
+                if (!Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), obstacleMask))
+                {
+                    n.seen = true;
+                }
+                else {
+                    Node hitNode = grid.NodeFromWorldPoint(hit.point);
+                    if (hitNode.walkable) {
+                        hitNode.walkable = false;
+                        Vector3 center = hit.point;
+                        foreach (Node no in grid.nodesInRadius(center, 1.0f))
+                        {
+                            if (no.danger < 1)
+                                no.danger++;
+                        }
+                        foreach (Node no in grid.nodesInRadius(center, 0.5f))
+                        {
+                            if (no.danger < 2)
+                                no.danger++;
+                        }
+                        Node node = grid.NodeFromWorldPoint(center);
+                        if (node.danger < 3)
+                            node.danger++;
+                    }
+                }
+                
+            }
         }
     }
 
