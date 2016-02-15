@@ -7,7 +7,7 @@ public class Unit : MonoBehaviour
 
     public Transform target;
     public Grid grid;
-    float speed = 0.4f;
+    float speed = 1f;
     Vector3[] path;
     int targetIndex=0;
     Vector3 height = new Vector3(0.0f, 0.5f, 0.0f);
@@ -77,9 +77,9 @@ public class Unit : MonoBehaviour
 
                 }
             }
-            else {
+            /*else {
                 print("Unit: target reached");
-            }
+            }*/
         }
     }
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)

@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\AStarPathfinding.cs" />
+    <Compile Include="Assets\Scripts\BFSSearch.cs" />
     <Compile Include="Assets\Scripts\BubbleExplorer.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\FieldOfView.cs" />

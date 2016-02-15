@@ -34,14 +34,6 @@ public class Grid : MonoBehaviour
         }
     }
 
-   /* void Start()
-    {
-        nodeDiameter = nodeRadius * 2;
-        gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
-        gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
-        CreateGrid();
-    }
-    */
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY];
@@ -97,13 +89,19 @@ public class Grid : MonoBehaviour
 
     public List<Node> nodesInRadius(Vector3 worlPosition, float radius) {
         List<Node> ret = new List<Node>();
-        Vector3 bottomLeft = worlPosition - new Vector3(radius, 0.0f, radius);
-        int ticks = Mathf.RoundToInt(2*radius/nodeDiameter);
-        for (int x = 0; x < ticks; x++) {
-            for (int y = 0; y < ticks; y++) {
-                Node node = NodeFromWorldPoint(bottomLeft + new Vector3(x * nodeDiameter, 0.0f, y * nodeDiameter));
-                if (node != null) {
-                    ret.Add(node);
+        Node node = NodeFromWorldPoint(worlPosition);
+
+        if (node != null)
+        {
+            int ticks = Mathf.RoundToInt(radius / nodeDiameter);
+            for (int x = node.gridX - ticks; x < +node.gridX+ticks; x++)
+            {
+                for (int y = +node.gridY - ticks; y < ticks + node.gridY; y++)
+                {
+                    if (x >= 0 && x < gridSizeX && y >= 0 && y < gridSizeY)
+                    {
+                        ret.Add(grid[x, y]);
+                    }
                 }
             }
         }

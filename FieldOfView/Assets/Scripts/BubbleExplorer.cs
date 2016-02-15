@@ -8,11 +8,9 @@ public class BubbleExplorer : MonoBehaviour {
 
     List<Node> realBorder;
     List<Node> virtualBorder;
-    List<Node> blocked;
     public Grid grid;
     public Transform target;
     public float viewRadius;
-    public float speed;
     Vector3 height = new Vector3(0.0f, 0.5f, 0.0f);
     Node dest ;
 
@@ -20,15 +18,15 @@ public class BubbleExplorer : MonoBehaviour {
     void Start () {
         realBorder = new List<Node>();
         virtualBorder = new List<Node>();
-        blocked = new List<Node>();
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         dest = null;
+        viewRadius = GetComponent<FieldOfView>().viewRadius;
     }
 	
 	// Update is called once per frame
 	void Update () {
         checkBorders(transform.position, viewRadius+1);
-        clearVirtualBorder();
+        
         //print(virtualBorder.Count);
         if (virtualBorder.Count > 0)
         {
@@ -48,20 +46,32 @@ public class BubbleExplorer : MonoBehaviour {
                         break;
                     }
                 }
-                target.position = dest.worldPosition + height;
+                if (dest != null)
+                {
+                    target.position = dest.worldPosition + height;
+                }
+                else
+                {
+                    print("Exploration complete");
+                }
             }
             else {
 
                 if (dest.danger > 0 || dest.visited)
                 {
-                    if (dest.visited)
-                    {
-                        print("Explorer: target reached");
-                    }
+          
             
-                    dest = getNearestAvailableNode(virtualBorder);
-    
-                    target.position = dest.worldPosition + height;
+                    dest = getMostAvailableNode(virtualBorder);
+                    //dest = getNearestAvailableNode(virtualBorder);
+
+                    if (dest != null)
+                    {
+                        target.position = dest.worldPosition + height;
+                    }
+                    else
+                    {
+                        print("Exploration complete");
+                    }
                 }
             }
 
@@ -95,6 +105,7 @@ public class BubbleExplorer : MonoBehaviour {
                 }
             }
         }
+        clearVirtualBorder();
     }
 
     bool isVirtualBorder(Node n){
@@ -120,18 +131,7 @@ public class BubbleExplorer : MonoBehaviour {
         }
     }
 
-    void turnTowards(Vector3 dir) {
-        transform.LookAt(dir+height);
-    }
-    bool moveTowards(Vector3 dir) {
-        if (grid.NodeFromWorldPoint(dir).danger == 0)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, dir + height, speed);
-            return true;
-        }
-        return false;
-    }
-    Node getNearestAvailableNode (List<Node> nodeList)
+    Node getNearestAvailableNode(List<Node> nodeList)
     {
         Node ret=null;
         float minDist=-1;
@@ -155,7 +155,14 @@ public class BubbleExplorer : MonoBehaviour {
                 }
             }
         }
+
         return ret;
+    }
+
+    Node getMostAvailableNode (List < Node > nodeList)
+    {
+        BFSSearch bfs = new BFSSearch();
+        return bfs.searchNearestNode(transform.position, nodeList, grid);
     }
 
 }
