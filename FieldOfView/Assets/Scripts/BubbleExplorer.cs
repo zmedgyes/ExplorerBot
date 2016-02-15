@@ -28,7 +28,8 @@ public class BubbleExplorer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         checkBorders(transform.position, viewRadius+1);
-        print(virtualBorder.Count);
+        clearVirtualBorder();
+        //print(virtualBorder.Count);
         if (virtualBorder.Count > 0)
         {
             Node localNode= grid.NodeFromWorldPoint(transform.position);
@@ -51,48 +52,18 @@ public class BubbleExplorer : MonoBehaviour {
             }
             else {
 
-                if (dest.danger == 0 && !dest.visited)
+                if (dest.danger > 0 || dest.visited)
                 {
-                    //followPath();
-                }
-                else {
-                    //chooseNewDest();
-                    //generatePathToDest();
-                    foreach (Node n in virtualBorder)
+                    if (dest.visited)
                     {
-                        if (!n.visited && n.danger==0)
-                        {
-                            dest = n;
-                            break;
-                        }
+                        print("Explorer: target reached");
                     }
+            
+                    dest = getNearestAvailableNode(virtualBorder);
+    
                     target.position = dest.worldPosition + height;
                 }
             }
-          
-            /*if(dest==null || dest.visited || blocked.Count>0)
-            foreach(Node n in virtualBorder)
-            {
-                if (!n.visited && !blocked.Contains(n))
-                {
-                    dest = n;
-                    break;
-                }
-            }
-
-            if (dest != null)
-            {
-
-                turnTowards(dest.worldPosition);
-                if (!moveTowards(dest.worldPosition))
-                {
-                    blocked.Add(dest);
-                }
-                else
-                {
-                    blocked.Clear();
-                }
-            }*/
 
         }
 
@@ -137,6 +108,18 @@ public class BubbleExplorer : MonoBehaviour {
         }
         return false;
     }
+
+    void clearVirtualBorder()
+    {
+        foreach(Node n in realBorder)
+        {
+            if (virtualBorder.Contains(n))
+            {
+                virtualBorder.Remove(n);
+            }
+        }
+    }
+
     void turnTowards(Vector3 dir) {
         transform.LookAt(dir+height);
     }
@@ -147,6 +130,32 @@ public class BubbleExplorer : MonoBehaviour {
             return true;
         }
         return false;
+    }
+    Node getNearestAvailableNode (List<Node> nodeList)
+    {
+        Node ret=null;
+        float minDist=-1;
+        foreach(Node n in nodeList)
+        {
+            if (minDist < 0)
+            {
+                if (!n.visited && n.danger == 0) { 
+                    minDist = Vector3.Distance(transform.position, n.worldPosition);
+                    ret = n;
+                }
+            }
+            else {
+                if (minDist > Vector3.Distance(transform.position, n.worldPosition))
+                {
+                    if (!n.visited && n.danger == 0)
+                    {
+                        minDist = Vector3.Distance(transform.position, n.worldPosition);
+                        ret = n;
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
 }

@@ -27,54 +27,60 @@ public class Unit : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!target.position.Equals(lastTargetPosition)) {
+        if (!target.position.Equals(lastTargetPosition))
+        {
             lastTargetPosition = target.position;
             PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
             path = null;
         }
-        else
-        if (path != null && Vector3.Distance(transform.position,target.position)>0.1f) {
-            if (Vector3.Distance(transform.position,currentWayPoint + height) < 0.05f)
+        else {
+            if (path != null && Vector3.Distance(transform.position, target.position) > 0.05f)
             {
-                targetIndex++;
-                currentWayPoint = path[targetIndex];
-            }
-
-            if (!recheckPath())
-            {
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
-                path = null;
-            }
-            else {
-               
-                float angle = Vector3.Angle(transform.forward, (currentWayPoint) + height - transform.position);
-                if (angle > 90) {
-                    angle = 90 - angle;
-                }
-                //print(angle);
-                if (Mathf.Abs(angle) < 0.1f )
+                if (Vector3.Distance(transform.position, currentWayPoint + height) < 0.05f)
                 {
-                    //rb.MovePosition( currentWayPoint + height);
-                    //rb.MovePosition(rb.position + (transform.forward * speed * Time.deltaTime));
-                    //transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
-                    
+                    targetIndex++;
+                    currentWayPoint = path[targetIndex];
+                }
+
+                if (!recheckPath())
+                {
+                    PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                    path = null;
                 }
                 else {
-                    Quaternion deltaRotation;
-                    //deltaRotation = Quaternion.Euler(0.0f, Mathf.Sign(angle)*0.1f, 0.0f);
-                    deltaRotation = Quaternion.Euler(0.0f, -angle, 0.0f);
-                    rb.MoveRotation(rb.rotation * deltaRotation);
-                    transform.LookAt(currentWayPoint + height);
-                
+
+                    float angle = Vector3.Angle(transform.forward, (currentWayPoint) + height - transform.position);
+                    if (angle > 90)
+                    {
+                        angle = 90 - angle;
+                    }
+                    //print(angle);
+                    if (Mathf.Abs(angle) < 0.1f)
+                    {
+                        //rb.MovePosition( currentWayPoint + height);
+                        //rb.MovePosition(rb.position + (transform.forward * speed * Time.deltaTime));
+                        //transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
+
+                    }
+                    else {
+                        Quaternion deltaRotation;
+                        //deltaRotation = Quaternion.Euler(0.0f, Mathf.Sign(angle)*0.1f, 0.0f);
+                        deltaRotation = Quaternion.Euler(0.0f, -angle, 0.0f);
+                        rb.MoveRotation(rb.rotation * deltaRotation);
+                        transform.LookAt(currentWayPoint + height);
+
+                    }
+                    //rb.MovePosition( currentWayPoint + height);
+                    //rb.MovePosition(Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime));
+
+                    transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
+
                 }
-                //rb.MovePosition( currentWayPoint + height);
-                //rb.MovePosition(Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime));
-
-                transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
-
+            }
+            else {
+                print("Unit: target reached");
             }
         }
-
     }
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
