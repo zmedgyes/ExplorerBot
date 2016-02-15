@@ -14,19 +14,26 @@ public class Unit : MonoBehaviour
     Vector3 currentWayPoint;
     Rigidbody rb;
     Vector3 directiondiff;
+    Vector3 lastTargetPosition;
 
     void Start()
     {
         PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         rb = GetComponent<Rigidbody>();
+        lastTargetPosition = target.position;
 
     }
 
     void FixedUpdate()
     {
-
-        if (path != null && Vector3.Distance(transform.position,target.position)>1.1f) {
+        if (!target.position.Equals(lastTargetPosition)) {
+            lastTargetPosition = target.position;
+            PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+            path = null;
+        }
+        else
+        if (path != null && Vector3.Distance(transform.position,target.position)>0.1f) {
             if (Vector3.Distance(transform.position,currentWayPoint + height) < 0.05f)
             {
                 targetIndex++;

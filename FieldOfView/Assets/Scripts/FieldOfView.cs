@@ -255,6 +255,7 @@ public class FieldOfView : MonoBehaviour
                     Node hitNode = grid.NodeFromWorldPoint(hit.point);
                     if (hitNode.walkable) {
                         hitNode.walkable = false;
+                        hitNode.seen = true;
                         Vector3 center = hit.point;
                         foreach (Node no in grid.nodesInRadius(center, 1.0f))
                         {

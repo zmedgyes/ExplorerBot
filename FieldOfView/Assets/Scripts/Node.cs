@@ -7,6 +7,8 @@ public class Node : IHeapItem<Node>
     public bool walkable;
     public int danger;
     public bool seen;
+    public bool visited;
+
     public Vector3 worldPosition;
     public int gridX;
     public int gridY;
@@ -24,6 +26,7 @@ public class Node : IHeapItem<Node>
         gridY = _gridY;
         danger = 0;
         seen = false;
+        visited = false;
     }
 
     public int fCost
