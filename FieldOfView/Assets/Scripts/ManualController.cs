@@ -18,8 +18,17 @@ public class ManualController : MonoBehaviour
 
     void Update()
     {
+        string op;
+        if ((Vector3.Angle(transform.forward, new Vector3(1, 0, 0))) > 90) {
+            op = "- ";
+        }
+        else {
+            op = "+ ";
+        }
         Vector3 mousePos = viewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, viewCamera.transform.position.y));
-        //transform.LookAt(mousePos + Vector3.up * transform.position.y);
+       // print(op+Vector3.Angle(transform.forward, new Vector3(0, 0, 1)));
+       
+            //transform.LookAt(mousePos + Vector3.up * transform.position.y);
         //velocity = new Vector3(0, 0, Input.GetAxisRaw("Vertical")).normalized * moveSpeed;
         velocity = transform.forward * Input.GetAxisRaw("Vertical") * moveSpeed;
 

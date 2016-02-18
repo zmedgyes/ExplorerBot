@@ -10,9 +10,12 @@ public class BubbleExplorer : MonoBehaviour {
     List<Node> virtualBorder;
     public Grid grid;
     public Transform target;
+    public Vector3 targetPosition;
     public float viewRadius;
     Vector3 height = new Vector3(0.0f, 0.5f, 0.0f);
     Node dest ;
+
+    bool started = false;
 
     // Use this for initialization
     void Start () {
@@ -20,7 +23,9 @@ public class BubbleExplorer : MonoBehaviour {
         virtualBorder = new List<Node>();
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         dest = null;
-        viewRadius = GetComponent<FieldOfView>().viewRadius;
+        //viewRadius = GetComponent<FieldOfView>().viewRadius;
+        targetPosition = transform.position;
+        target.position = transform.position;
     }
 	
 	// Update is called once per frame
@@ -49,11 +54,10 @@ public class BubbleExplorer : MonoBehaviour {
                 if (dest != null)
                 {
                     target.position = dest.worldPosition + height;
+                    targetPosition = dest.worldPosition + height;
+                    
                 }
-                else
-                {
-                    print("Exploration complete");
-                }
+           
             }
             else {
 
@@ -67,18 +71,27 @@ public class BubbleExplorer : MonoBehaviour {
                     if (dest != null)
                     {
                         target.position = dest.worldPosition + height;
+                        targetPosition = dest.worldPosition + height;
                     }
                     else
                     {
-                        print("Exploration complete");
+                        //print("Exploration complete");
                     }
                 }
             }
 
         }
+        else
+        {
+            if (started)
+            {
+                print("Exploration complete");
+                started = false;
+            }
+        }
 
-    	
-	}
+
+    }
     void checkBorders(Vector3 position, float radius)
     {
         List<Node> nodesInRange=grid.nodesInRadius(position,radius);
@@ -94,6 +107,7 @@ public class BubbleExplorer : MonoBehaviour {
                     else {
                         if (!virtualBorder.Contains(n) && isBorder) {
                             virtualBorder.Add(n);
+                            started = true;
                         }
                     }
                 }

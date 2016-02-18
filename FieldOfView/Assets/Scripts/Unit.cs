@@ -5,9 +5,17 @@ public class Unit : MonoBehaviour
 {
 
 
-    public Transform target;
+    //public Transform target;
+
+    Vector3 targetPosition;
     public Grid grid;
-    float speed = 1f;
+    public float movementSpeed = 1f;
+    public float rotationSpeed;
+    public float rotationUnit = 0.5f;
+    public float rotationDirectionDifference=30;
+
+    int maxRotationSpeed;
+
     Vector3[] path;
     int targetIndex=0;
     Vector3 height = new Vector3(0.0f, 0.5f, 0.0f);
@@ -18,23 +26,27 @@ public class Unit : MonoBehaviour
 
     void Start()
     {
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        targetPosition = transform.position;
+        maxRotationSpeed = Mathf.RoundToInt(rotationSpeed*Time.deltaTime / rotationUnit);
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         rb = GetComponent<Rigidbody>();
-        lastTargetPosition = target.position;
+        lastTargetPosition = transform.position;
+
 
     }
 
     void FixedUpdate()
     {
-        if (!target.position.Equals(lastTargetPosition))
+        targetPosition = GetComponent<BubbleExplorer>().targetPosition;
+
+        if (!targetPosition.Equals(lastTargetPosition))
         {
-            lastTargetPosition = target.position;
-            PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+            lastTargetPosition = targetPosition;
+            PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
             path = null;
         }
         else {
-            if (path != null && Vector3.Distance(transform.position, target.position) > 0.05f)
+            if (path != null && Vector3.Distance(transform.position, targetPosition) > 0.05f)
             {
                 if (Vector3.Distance(transform.position, currentWayPoint + height) < 0.05f)
                 {
@@ -44,44 +56,39 @@ public class Unit : MonoBehaviour
 
                 if (!recheckPath())
                 {
-                    PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                    PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
                     path = null;
                 }
                 else {
 
                     float angle = Vector3.Angle(transform.forward, (currentWayPoint) + height - transform.position);
-                    if (angle > 90)
-                    {
-                        angle = 90 - angle;
-                    }
-                    //print(angle);
-                    if (Mathf.Abs(angle) < 0.1f)
-                    {
-                        //rb.MovePosition( currentWayPoint + height);
-                        //rb.MovePosition(rb.position + (transform.forward * speed * Time.deltaTime));
-                        //transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
 
+                    bool posDir = (Vector3.Angle(transform.right, (currentWayPoint) + height - transform.position) > 90);
+                    int rot = Mathf.RoundToInt(angle / rotationUnit);
+
+                    if (rot > maxRotationSpeed)
+                    {
+                        rot = maxRotationSpeed;
+                    }
+                    Quaternion deltaRotation;
+                    if (posDir)
+                    {
+                        deltaRotation = Quaternion.Euler(0.0f, -(rot * rotationUnit), 0.0f);
                     }
                     else {
-                        Quaternion deltaRotation;
-                        //deltaRotation = Quaternion.Euler(0.0f, Mathf.Sign(angle)*0.1f, 0.0f);
-                        deltaRotation = Quaternion.Euler(0.0f, -angle, 0.0f);
-                        rb.MoveRotation(rb.rotation * deltaRotation);
-                        transform.LookAt(currentWayPoint + height);
-
+                        deltaRotation = Quaternion.Euler(0.0f, (rot * rotationUnit), 0.0f);
                     }
-                    //rb.MovePosition( currentWayPoint + height);
-                    //rb.MovePosition(Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime));
-
-                    transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, speed * Time.deltaTime);
-
+                    rb.MoveRotation(rb.rotation * deltaRotation);
+                    if (Mathf.Abs(angle) < rotationDirectionDifference)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, movementSpeed * Time.deltaTime);
+                       
+                    }
                 }
             }
-            /*else {
-                print("Unit: target reached");
-            }*/
         }
     }
+
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
         if (pathSuccessful)
@@ -110,10 +117,10 @@ public class Unit : MonoBehaviour
                 currentWaypoint = path[targetIndex];
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint+height, speed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint+height, movementSpeed * Time.deltaTime);
             if (!recheckPath())
             {
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
             }
             yield return null;
 

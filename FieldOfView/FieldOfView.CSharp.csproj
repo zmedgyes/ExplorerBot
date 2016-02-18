@@ -73,6 +73,8 @@
     <Compile Include="Assets\Scripts\ManualController.cs" />
     <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Scripts\PathRequestManager.cs" />
+    <Compile Include="Assets\Scripts\Sensor\ProximitySensor.cs" />
+    <Compile Include="Assets\Scripts\Sensor\VisionSensor.cs" />
     <Compile Include="Assets\Scripts\TestPath.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
   </ItemGroup>
