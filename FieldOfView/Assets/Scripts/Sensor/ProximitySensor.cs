@@ -12,7 +12,10 @@ public class ProximitySensor : MonoBehaviour
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
+    public LayerMask playerMask;
     public LayerMask viewMask;
+
+    public Unit unit;
 
     [HideInInspector]
     public List<Transform> visibleTargets = new List<Transform>();
@@ -240,6 +243,7 @@ public class ProximitySensor : MonoBehaviour
     {
         List<Node> nodes = grid.nodesInRadius(transform.position, viewRadius);
         proxy = false;
+        List<Node> dynamicException = new List<Node>();
         foreach (Node n in nodes)
         {
             Ray ray = new Ray(transform.position, n.worldPosition - transform.position);
@@ -247,13 +251,18 @@ public class ProximitySensor : MonoBehaviour
             if (Mathf.Abs(Vector3.Angle((n.worldPosition - transform.position), (transform.forward))) < viewAngle / 2
                      && Vector3.Distance(n.worldPosition, transform.position) < viewRadius)
             {
-                if (Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), obstacleMask))
+                if (Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), obstacleMask|playerMask))
                 {
                     proxy = true;
-                    return;
+                    //return;
+                    dynamicException.AddRange(grid.nodesInRadius(hit.point,1f));
                 }
 
             }
+        }
+        if (dynamicException.Count > 0) {
+            unit.dynamicException = dynamicException;
+
         }
     }
 

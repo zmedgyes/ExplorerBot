@@ -10,9 +10,14 @@ public class Grid : MonoBehaviour
     public float nodeRadius;
     public bool drawGizmos;
     public bool drawSeenGizmos;
+    public List <Transform> playerList = new List<Transform>();
     Node[,] grid;
 
     public List<Node> path;
+
+    public List<Node> unwalkable;
+    public List<Node> dynamicUnwalkable;
+
 
     float nodeDiameter;
     int gridSizeX, gridSizeY;
@@ -23,6 +28,8 @@ public class Grid : MonoBehaviour
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
+        unwalkable = new List<Node>();
+        dynamicUnwalkable = new List<Node>();
         CreateGrid();
     }
 
@@ -130,5 +137,16 @@ public class Grid : MonoBehaviour
                  }
              }
         }
+    }
+
+    public void updatePlayerPositions(Transform currentObject)
+    {
+        List<Node> playerPos = new List<Node>();
+        foreach(Transform g in playerList)
+        {
+            if(g!=currentObject)
+            playerPos.AddRange(nodesInRadius(g.position, 1));
+        }
+        dynamicUnwalkable = playerPos;
     }
 }

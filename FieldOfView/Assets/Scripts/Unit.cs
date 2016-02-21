@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Unit : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class Unit : MonoBehaviour
     public float rotationSpeed;
     public float rotationUnit = 0.5f;
     public float rotationDirectionDifference=30;
+    public List<Node> dynamicException =new List<Node>();
 
     int maxRotationSpeed;
 
@@ -31,6 +33,7 @@ public class Unit : MonoBehaviour
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         rb = GetComponent<Rigidbody>();
         lastTargetPosition = transform.position;
+        grid.playerList.Add(transform);
 
 
     }
@@ -42,7 +45,8 @@ public class Unit : MonoBehaviour
         if (!targetPosition.Equals(lastTargetPosition))
         {
             lastTargetPosition = targetPosition;
-            PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+            //PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+            ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable, new List<Node>(),OnPathFound);
             path = null;
         }
         else {
@@ -56,11 +60,14 @@ public class Unit : MonoBehaviour
 
                 if (!recheckPath())
                 {
-                    PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+                    //PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+         
+           
+                    ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable,grid.dynamicUnwalkable, OnPathFound);
                     path = null;
                 }
                 else {
-
+                                
                     float angle = Vector3.Angle(transform.forward, (currentWayPoint) + height - transform.position);
 
                     bool posDir = (Vector3.Angle(transform.right, (currentWayPoint) + height - transform.position) > 90);
@@ -82,7 +89,6 @@ public class Unit : MonoBehaviour
                     if (Mathf.Abs(angle) < rotationDirectionDifference)
                     {
                         transform.position = Vector3.MoveTowards(transform.position, currentWayPoint + height, movementSpeed * Time.deltaTime);
-                       
                     }
                 }
             }
@@ -129,8 +135,9 @@ public class Unit : MonoBehaviour
 
     bool recheckPath()
     {
+        grid.updatePlayerPositions(transform);
         for (int i = 0; i < path.Length; i++) {
-            if (grid.NodeFromWorldPoint(path[i]).danger > 0) {
+            if (grid.NodeFromWorldPoint(path[i]).danger > 0 || grid.dynamicUnwalkable.Contains(grid.NodeFromWorldPoint(path[i]))) {
                 return false;
             }
         }

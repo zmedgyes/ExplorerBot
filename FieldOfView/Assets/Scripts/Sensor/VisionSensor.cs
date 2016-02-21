@@ -261,8 +261,10 @@ public class VisionSensor : MonoBehaviour
                         Vector3 center = hit.point;
                         foreach (Node no in grid.nodesInRadius(center, 1.0f))
                         {
-                            if (no.danger < 1)
+                            if (no.danger < 1) 
                                 no.danger++;
+
+                            grid.unwalkable.Add(no);
                         }
                         foreach (Node no in grid.nodesInRadius(center, 0.5f))
                         {
