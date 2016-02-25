@@ -7,25 +7,19 @@ public class ManualController : MonoBehaviour
     public float moveSpeed = 6;
 
     Rigidbody rb;
-    Camera viewCamera;
+    //Camera viewCamera;
     Vector3 velocity;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        viewCamera = Camera.main;
+        //viewCamera = Camera.main;
     }
 
     void Update()
     {
-        string op;
-        if ((Vector3.Angle(transform.forward, new Vector3(1, 0, 0))) > 90) {
-            op = "- ";
-        }
-        else {
-            op = "+ ";
-        }
-        Vector3 mousePos = viewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, viewCamera.transform.position.y));
+
+        //Vector3 mousePos = viewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, viewCamera.transform.position.y));
        // print(op+Vector3.Angle(transform.forward, new Vector3(0, 0, 1)));
        
             //transform.LookAt(mousePos + Vector3.up * transform.position.y);

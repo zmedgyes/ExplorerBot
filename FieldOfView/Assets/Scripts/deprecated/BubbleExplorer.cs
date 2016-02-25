@@ -19,8 +19,10 @@ public class BubbleExplorer : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        realBorder = new List<Node>();
-        virtualBorder = new List<Node>();
+        //realBorder = new List<Node>();
+       // virtualBorder = new List<Node>();
+        virtualBorder = grid.virtualBorder;
+        realBorder = grid.realBorder;
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         dest = null;
         //viewRadius = GetComponent<FieldOfView>().viewRadius;
@@ -60,8 +62,8 @@ public class BubbleExplorer : MonoBehaviour {
            
             }
             else {
-
-                if (dest.danger > 0 || dest.visited)
+                grid.updatePlayerPositions(transform);
+                if (dest.danger > 0 || dest.visited || grid.dynamicUnwalkable.Contains(dest))
                 {
           
             
@@ -136,7 +138,8 @@ public class BubbleExplorer : MonoBehaviour {
 
     void clearVirtualBorder()
     {
-        foreach(Node n in realBorder)
+       // foreach (Node n in grid.unwalkable)
+        foreach (Node n in realBorder)
         {
             if (virtualBorder.Contains(n))
             {

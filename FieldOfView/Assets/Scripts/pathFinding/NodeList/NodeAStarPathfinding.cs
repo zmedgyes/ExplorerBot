@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 
-public class AStarPathfinding : MonoBehaviour
+public class NodeAStarPathfinding : MonoBehaviour
 {
 
 
-    PathRequestManager requestManager;
-    Grid grid;
+    NodePathRequestManager requestManager;
+    public Grid grid;
 
     void Awake()
     {
-        requestManager = GetComponent<PathRequestManager>();
-        grid = GetComponent<Grid>();
+        requestManager = GetComponent<NodePathRequestManager>();
+        //grid = GetComponent<Grid>();
     }
 
 
@@ -29,13 +29,14 @@ public class AStarPathfinding : MonoBehaviour
         Stopwatch sw = new Stopwatch();
         sw.Start();
 
-        Vector3[] waypoints = new Vector3[0];
+        List<Node> waypoints = new List<Node>();
         bool pathSuccess = false;
 
+        if (grid == null) { print("null"); }
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        if (targetNode.danger<1)
+        if ((targetNode.danger < 1 && targetNode.walkable) )
         //if (startNode.walkable && targetNode.walkable)
         {
             Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
@@ -50,15 +51,15 @@ public class AStarPathfinding : MonoBehaviour
                 if (currentNode == targetNode)
                 {
                     sw.Stop();
-                   // print("Path found: " + sw.ElapsedMilliseconds + " ms");
+                    // print("Path found: " + sw.ElapsedMilliseconds + " ms");
                     pathSuccess = true;
                     break;
                 }
 
                 foreach (Node neighbour in grid.GetNeighbours(currentNode))
                 {
-                    if (neighbour.danger>0 || closedSet.Contains(neighbour))
-                        //if (!neighbour.walkable || closedSet.Contains(neighbour))
+                    if (neighbour.danger > 0 || !neighbour.walkable || closedSet.Contains(neighbour))
+                    //if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
                         continue;
                     }
@@ -87,7 +88,7 @@ public class AStarPathfinding : MonoBehaviour
 
     }
 
-    Vector3[] RetracePath(Node startNode, Node endNode)
+    List<Node> RetracePath(Node startNode, Node endNode)
     {
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
@@ -97,32 +98,10 @@ public class AStarPathfinding : MonoBehaviour
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
-        /*Vector3[] waypoints = SimplifyPath(path);
-        Array.Reverse(waypoints);*/
+        path.Add(currentNode);
         path.Reverse();
-        List<Vector3> waypoints = new List<Vector3>();
-        foreach (Node n in path) {
-            waypoints.Add(n.worldPosition);
-        }
-        return waypoints.ToArray();
+        return path;
 
-    }
-
-    Vector3[] SimplifyPath(List<Node> path)
-    {
-        List<Vector3> waypoints = new List<Vector3>();
-        Vector2 directionOld = Vector2.zero;
-
-        for (int i = 1; i < path.Count; i++)
-        {
-            Vector2 directionNew = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
-            if (directionNew != directionOld)
-            {
-                waypoints.Add(path[i].worldPosition);
-            }
-            directionOld = directionNew;
-        }
-        return waypoints.ToArray();
     }
 
     int GetDistance(Node nodeA, Node nodeB)
