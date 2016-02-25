@@ -138,6 +138,7 @@ public class Grid : MonoBehaviour
                     if (n.seen && drawSeenGizmos) { Gizmos.color = Color.cyan; }
                     if (dynamicUnwalkable.Contains(n))
                        Gizmos.color = Color.black;
+                    if (!n.walkable) { Gizmos.color = Color.red; }
                     Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - .1f));
                  }
              }

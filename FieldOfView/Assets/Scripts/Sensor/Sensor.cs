@@ -58,7 +58,8 @@ public class Sensor : MonoBehaviour
                   
                 }
                 else {
-                    unwalkable.AddRange(grid.nodesInRadius(hit.point, 1.0f));
+                    unwalkable.Add(grid.NodeFromWorldPoint(hit.point));
+                    //unwalkable.AddRange(grid.nodesInRadius(hit.point, 1.0f));
                 }
 
             }

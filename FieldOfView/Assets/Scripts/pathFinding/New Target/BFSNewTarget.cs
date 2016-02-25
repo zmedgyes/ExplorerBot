@@ -44,9 +44,11 @@ public class BFSNewTarget : MonoBehaviour
                 int addedCount = 0;
                 while (run)
                 {
+                    addedCount = 0;
                     foreach (Node n in lastAddedNodes)
                     {
                         List<Node> neighbours = grid.GetNeighbours(n);
+
                         foreach (Node node in neighbours)
                         {
                             if (node.danger == 0 && !node.visited && !visitedNodes.Contains(node) && !grid.dynamicUnwalkable.Contains(node)
@@ -66,10 +68,11 @@ public class BFSNewTarget : MonoBehaviour
                             }
                         }
                         if (targetSuccess) { break; }
+                        
                     }
                     lastAddedNodes = nowAddedNodes;
                     nowAddedNodes = new List<Node>();
-                    if (targetSuccess) { run = false; }
+                    if (targetSuccess || addedCount==0) { run = false; }
                 }
 
             }

@@ -150,6 +150,7 @@ public class ProtocolClient : MonoBehaviour {
         {
             dataSent = true;
         }
+        lastWalkable.AddRange(grid.nodesInRadius(transform.position, 0.5f));
         server.uploadSensorData(lastWalkable, lastUnwalkable);
         lastWalkable.Clear();
         lastUnwalkable.Clear();
@@ -208,7 +209,6 @@ public class ProtocolClient : MonoBehaviour {
             for (int i = currentWaypoint; i < path.Count; i++)
             {
                 Gizmos.color = Color.black;
-                //Gizmos.DrawCube(path[i], Vector3.one);
 
                 if (i == currentWaypoint)
                 {
@@ -219,9 +219,6 @@ public class ProtocolClient : MonoBehaviour {
                 }
 
             }
-            Gizmos.color = Color.white;
-            //Gizmos.DrawCube(currentWayPoint, Vector3.one * 1.5f);
-            //Gizmos.DrawLine(transform.position, directiondiff);
         }
     }
 }

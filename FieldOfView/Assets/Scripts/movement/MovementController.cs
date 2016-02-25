@@ -21,7 +21,7 @@ public class MovementController : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void LateUpdate () {
         if (!targetReached()){
             Vector3 targetDirection = target + height - transform.position;
 

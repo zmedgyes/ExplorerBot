@@ -63,12 +63,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\BFSSearch.cs" />
     <Compile Include="Assets\Scripts\ProtocolClient.cs" />
     <Compile Include="Assets\Scripts\ProtocolServer.cs" />
     <Compile Include="Assets\Scripts\Sensor\ProximitySensor.cs" />
     <Compile Include="Assets\Scripts\Sensor\Sensor.cs" />
     <Compile Include="Assets\Scripts\Sensor\VisionSensor.cs" />
+    <Compile Include="Assets\Scripts\deprecated\BFSSearch.cs" />
     <Compile Include="Assets\Scripts\deprecated\BubbleExplorer.cs" />
     <Compile Include="Assets\Scripts\deprecated\FieldOfView.cs" />
     <Compile Include="Assets\Scripts\misc\Grid.cs" />

@@ -43,6 +43,10 @@ public class ProtocolServer : MonoBehaviour {
             n.danger = 1;
             n.seen = true;
             realBorder.Add(n);
+            foreach (Node node in grid.nodesInRadius(n.worldPosition, 1.0f))
+            {
+                node.danger = 1;
+            }
             //virtualBorder.Remove(n);
         }
 
