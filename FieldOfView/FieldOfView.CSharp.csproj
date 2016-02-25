@@ -63,11 +63,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Controller.cs" />
-    <Compile Include="Assets\Scripts\FieldOfView.cs" />
-    <Compile Include="Assets\Scripts\Grid.cs" />
-    <Compile Include="Assets\Scripts\Node.cs" />
-    <Compile Include="Assets\Scripts\TestPath.cs" />
+    <Compile Include="Assets\Scripts\BFSSearch.cs" />
+    <Compile Include="Assets\Scripts\ProtocolClient.cs" />
+    <Compile Include="Assets\Scripts\ProtocolServer.cs" />
+    <Compile Include="Assets\Scripts\Sensor\ProximitySensor.cs" />
+    <Compile Include="Assets\Scripts\Sensor\Sensor.cs" />
+    <Compile Include="Assets\Scripts\Sensor\VisionSensor.cs" />
+    <Compile Include="Assets\Scripts\deprecated\BubbleExplorer.cs" />
+    <Compile Include="Assets\Scripts\deprecated\FieldOfView.cs" />
+    <Compile Include="Assets\Scripts\misc\Grid.cs" />
+    <Compile Include="Assets\Scripts\misc\Heap.cs" />
+    <Compile Include="Assets\Scripts\misc\Node.cs" />
+    <Compile Include="Assets\Scripts\movement\ManualController.cs" />
+    <Compile Include="Assets\Scripts\movement\MovementController.cs" />
+    <Compile Include="Assets\Scripts\movement\Unit.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\General\AStarPathfinding.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\General\PathRequestManager.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\List\ListAStarPathfinding.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\List\ListPathRequestManager.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\New Target\BFSNewTarget.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\New Target\NewTargetManager.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\NodeList\NodeAStarPathfinding.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\NodeList\NodePathRequestManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
