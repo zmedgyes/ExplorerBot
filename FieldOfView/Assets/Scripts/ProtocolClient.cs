@@ -6,6 +6,8 @@ public class ProtocolClient : MonoBehaviour {
 
     //public Transform self;
     public ProtocolServer server;
+    public float bodyRadius = 0.5f * Mathf.Sqrt(2);
+
     List<Node> path = null;
     Node target = null;
     Node lastTarget;
@@ -69,6 +71,9 @@ public class ProtocolClient : MonoBehaviour {
                     }
                     //ha jó a jelenlegi út
                     else {
+
+                        controller.moveTo(path[currentWaypoint].worldPosition);
+
                         //ha elértük az aktuális waypointot
                         if (waypointReached()) {
                             //ha az elért pont a target
@@ -109,10 +114,10 @@ public class ProtocolClient : MonoBehaviour {
 
     bool checkPath() {
         //TODO
-        grid.updatePlayerPositions(transform);
-        for (int i = 0; i < path.Count; i++)
+        //grid.updatePlayerPositions(transform);
+        for (int i = currentWaypoint; i < path.Count; i++)
         {
-            if (path[i].danger > 0 || grid.dynamicUnwalkable.Contains(path[i])){
+            if (path[i].danger > 0 || server.getDynamicUnwalkable(this).Contains(path[i])){
                 return false;
             }
         }
@@ -151,7 +156,7 @@ public class ProtocolClient : MonoBehaviour {
             dataSent = true;
         }
         lastWalkable.AddRange(grid.nodesInRadius(transform.position, 0.5f));
-        server.uploadSensorData(lastWalkable, lastUnwalkable);
+        server.uploadSensorData(lastWalkable, lastUnwalkable,this);
         lastWalkable.Clear();
         lastUnwalkable.Clear();
         

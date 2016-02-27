@@ -18,12 +18,12 @@ public class NodeAStarPathfinding : MonoBehaviour
     }
 
 
-    public void StartFindPath(Vector3 startPos, Vector3 targetPos)
+    public void StartFindPath(Vector3 startPos, Vector3 targetPos, HashSet<Node> dynamicBlocked)
     {
-        StartCoroutine(FindPath(startPos, targetPos));
+        StartCoroutine(FindPath(startPos, targetPos, dynamicBlocked));
     }
 
-    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
+    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos, HashSet<Node> dynamicBlocked)
     {
 
         Stopwatch sw = new Stopwatch();
@@ -36,7 +36,7 @@ public class NodeAStarPathfinding : MonoBehaviour
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        if ((targetNode.danger < 1 && targetNode.walkable) )
+        if (targetNode.danger < 1 && targetNode.walkable)
         //if (startNode.walkable && targetNode.walkable)
         {
             Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
@@ -58,7 +58,7 @@ public class NodeAStarPathfinding : MonoBehaviour
 
                 foreach (Node neighbour in grid.GetNeighbours(currentNode))
                 {
-                    if (neighbour.danger > 0 || !neighbour.walkable || closedSet.Contains(neighbour))
+                    if (neighbour.danger > 0 || !neighbour.walkable || closedSet.Contains(neighbour) || dynamicBlocked.Contains(neighbour))
                     //if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
                         continue;

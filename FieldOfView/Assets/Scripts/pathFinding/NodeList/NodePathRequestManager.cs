@@ -20,9 +20,9 @@ public class NodePathRequestManager : MonoBehaviour
         pathfinding = GetComponent<NodeAStarPathfinding>();
     }
 
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<List<Node>, bool> callback)
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, HashSet<Node> dynamicBlocked, Action<List<Node>, bool> callback)
     {
-        PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
+        PathRequest newRequest = new PathRequest(pathStart, pathEnd, dynamicBlocked, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
         instance.TryProcessNext();
     }
@@ -33,7 +33,7 @@ public class NodePathRequestManager : MonoBehaviour
         {
             currentPathRequest = pathRequestQueue.Dequeue();
             isProcessingPath = true;
-            pathfinding.StartFindPath(currentPathRequest.pathStart, currentPathRequest.pathEnd);
+            pathfinding.StartFindPath(currentPathRequest.pathStart, currentPathRequest.pathEnd, currentPathRequest.dynamicBlocked);
         }
     }
 
@@ -48,13 +48,15 @@ public class NodePathRequestManager : MonoBehaviour
     {
         public Vector3 pathStart;
         public Vector3 pathEnd;
+        public HashSet<Node> dynamicBlocked;
         public Action<List<Node>, bool> callback;
 
-        public PathRequest(Vector3 _start, Vector3 _end, Action<List<Node>, bool> _callback)
+        public PathRequest(Vector3 _start, Vector3 _end, HashSet<Node> _dynamicBlocked, Action<List<Node>, bool> _callback)
         {
             pathStart = _start;
             pathEnd = _end;
             callback = _callback;
+            dynamicBlocked = _dynamicBlocked;
         }
 
     }

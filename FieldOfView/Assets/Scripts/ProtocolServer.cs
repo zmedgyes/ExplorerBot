@@ -12,6 +12,7 @@ public class ProtocolServer : MonoBehaviour {
     public List<ProtocolClient> clients= new List<ProtocolClient>();
     public Grid grid;
 
+    List<Node> available = new List<Node>();
     // Use this for initialization
     void Start () {
 	
@@ -23,20 +24,23 @@ public class ProtocolServer : MonoBehaviour {
 	}
 
     public void requestNewTarget(ProtocolClient client, Action<Node, bool> callback) {
-        List<Node> available = new List<Node>();
+        available = new List<Node>();
         clearVirtualBorder();
+        HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client);
         foreach (Node n in virtualBorder)
         {
-            available.Add(n);
+            if (!dynamicBlocked.Contains(n)) {
+                available.Add(n);
+            }
         }
         NewTargetManager.RequestTarget(client.transform.position, available, callback);
     }
 
     public void requestNewPath(ProtocolClient client, Node pathEnd, Action<List<Node>, bool> callback) {
-        NodePathRequestManager.RequestPath(client.transform.position, pathEnd.worldPosition, callback);
+        NodePathRequestManager.RequestPath(client.transform.position, pathEnd.worldPosition,getDynamicUnwalkable(client), callback);
     }
 
-    public void uploadSensorData(List<Node> walkable,List<Node> unwalkable) {
+    public void uploadSensorData(List<Node> walkable,List<Node> unwalkable,ProtocolClient client) {
         foreach(Node n in unwalkable)
         {
             n.walkable = false;
@@ -46,6 +50,7 @@ public class ProtocolServer : MonoBehaviour {
             foreach (Node node in grid.nodesInRadius(n.worldPosition, 1.0f))
             {
                 node.danger = 1;
+                node.seen=true;
             }
             //virtualBorder.Remove(n);
         }
@@ -62,6 +67,20 @@ public class ProtocolServer : MonoBehaviour {
                // virtualBorder.Remove(n);
             }
         }
+        foreach (Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
+        {
+            //n.walkable = true;
+            n.seen = true;
+            realBorder.Remove(n);
+            if (isVirtualBorder(n))
+            {
+                virtualBorder.Add(n);
+            }
+            else {
+                // virtualBorder.Remove(n);
+            }
+        }
+
     }
 
     bool isVirtualBorder(Node n){
@@ -80,11 +99,37 @@ public class ProtocolServer : MonoBehaviour {
     {
         HashSet<Node> temp = new HashSet<Node>();
         foreach(Node n in virtualBorder){
-            if (isVirtualBorder(n) && !realBorder.Contains(n))
+            if (isVirtualBorder(n) && !realBorder.Contains(n) && n.danger==0)
             {
                 temp.Add(n);
             }
         }
         virtualBorder = temp;
+    }
+
+    public HashSet<Node> getDynamicUnwalkable(ProtocolClient requester) {
+        HashSet<Node> ret = new HashSet<Node>();
+        foreach(ProtocolClient client in clients)
+        {
+            if (client != requester)
+            {
+                foreach(Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
+                {
+                    ret.Add(n);
+                }
+            }
+        }
+        return ret;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        foreach (Node n in available)
+                {
+  
+                    Gizmos.DrawCube(n.worldPosition, Vector3.one*0.1f);
+                }
+       
     }
 }

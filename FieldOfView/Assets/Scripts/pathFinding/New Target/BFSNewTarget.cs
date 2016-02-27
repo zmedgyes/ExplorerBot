@@ -34,15 +34,14 @@ public class BFSNewTarget : MonoBehaviour
         List<Node> lastAddedNodes = new List<Node>();
         List<Node> nowAddedNodes = new List<Node>();
         Node center = grid.NodeFromWorldPoint(startPos);
-        bool run = true;
         if (center != null && available != null)
         {
             if (available.Count > 0)
             {
                 visitedNodes.Add(center);
                 lastAddedNodes.Add(center);
-                int addedCount = 0;
-                while (run)
+                int addedCount = 1;
+                while (addedCount>0)
                 {
                     addedCount = 0;
                     foreach (Node n in lastAddedNodes)
@@ -72,7 +71,7 @@ public class BFSNewTarget : MonoBehaviour
                     }
                     lastAddedNodes = nowAddedNodes;
                     nowAddedNodes = new List<Node>();
-                    if (targetSuccess || addedCount==0) { run = false; }
+                    if (targetSuccess) { break; }
                 }
 
             }
