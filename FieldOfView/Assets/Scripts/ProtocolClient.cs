@@ -9,7 +9,7 @@ public class ProtocolClient : MonoBehaviour {
     public float bodyRadius = 0.5f * Mathf.Sqrt(2);
 
     List<Node> path = null;
-    Node target = null;
+    public Node target = null;
     Node lastTarget;
     int currentWaypoint;
     Grid grid;
@@ -108,7 +108,7 @@ public class ProtocolClient : MonoBehaviour {
                 print("no more target");
                 finished = true;
             }
-           
+            StartCoroutine(WaitAndNewPath(5));
         }
 	}
 
@@ -178,7 +178,10 @@ public class ProtocolClient : MonoBehaviour {
         targetSuccess = targetSuccessful;
         if (targetSuccessful){
             target = newTarget;
-            targetIndicator.position = target.worldPosition;
+            if (targetIndicator != null)
+            {
+                targetIndicator.position = target.worldPosition;
+            }
         }
     }
 
@@ -204,6 +207,15 @@ public class ProtocolClient : MonoBehaviour {
                 break;
             }
         }
+    }
+
+    IEnumerator WaitAndNewPath(int sec)
+    {
+        //while (true)
+        //{
+            yield return new WaitForSeconds(sec);
+            getNewTarget();
+        //}
     }
 
 

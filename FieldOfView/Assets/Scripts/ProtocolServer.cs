@@ -11,6 +11,7 @@ public class ProtocolServer : MonoBehaviour {
     public HashSet<Node> dynamic = new HashSet<Node>();
     public List<ProtocolClient> clients= new List<ProtocolClient>();
     public Grid grid;
+    public float targetRepelRadius = 1;
 
     List<Node> available = new List<Node>();
     // Use this for initialization
@@ -27,9 +28,10 @@ public class ProtocolServer : MonoBehaviour {
         available = new List<Node>();
         clearVirtualBorder();
         HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client);
+        HashSet<Node> targetRepels = getOtherTargetRepels(client);
         foreach (Node n in virtualBorder)
         {
-            if (!dynamicBlocked.Contains(n)) {
+            if (!(dynamicBlocked.Contains(n) || targetRepels.Contains(n))) {
                 available.Add(n);
             }
         }
@@ -47,7 +49,7 @@ public class ProtocolServer : MonoBehaviour {
             n.danger = 1;
             n.seen = true;
             realBorder.Add(n);
-            foreach (Node node in grid.nodesInRadius(n.worldPosition, 1.0f))
+            foreach (Node node in grid.nodesInRadius(n.worldPosition,client.bodyRadius))
             {
                 node.danger = 1;
                 node.seen=true;
@@ -114,6 +116,23 @@ public class ProtocolServer : MonoBehaviour {
             if (client != requester)
             {
                 foreach(Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
+                {
+                    ret.Add(n);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public HashSet<Node> getOtherTargetRepels(ProtocolClient requester)
+    {
+        
+        HashSet<Node> ret = new HashSet<Node>();
+        foreach (ProtocolClient client in clients)
+        {
+            if (client != requester && client.target!=null)
+            {
+                foreach (Node n in grid.nodesInRadius(client.target.worldPosition, targetRepelRadius))
                 {
                     ret.Add(n);
                 }
