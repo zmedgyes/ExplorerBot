@@ -45,8 +45,8 @@ public class Unit : MonoBehaviour
         if (!targetPosition.Equals(lastTargetPosition))
         {
             lastTargetPosition = targetPosition;
-            //PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
-            ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable, new List<Node>(),OnPathFound);
+            PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+           // ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable, new List<Node>(),OnPathFound);
             path = null;
         }
         else {
@@ -60,10 +60,10 @@ public class Unit : MonoBehaviour
 
                 if (!recheckPath())
                 {
-                    //PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
+                    PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
          
            
-                    ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable,grid.dynamicUnwalkable, OnPathFound);
+                    //ListPathRequestManager.RequestPath(transform.position, targetPosition, grid.unwalkable,grid.dynamicUnwalkable, OnPathFound);
                     path = null;
                 }
                 else {
@@ -135,9 +135,9 @@ public class Unit : MonoBehaviour
 
     bool recheckPath()
     {
-        grid.updatePlayerPositions(transform);
+        //grid.updatePlayerPositions(transform);
         for (int i = 0; i < path.Length; i++) {
-            if (grid.NodeFromWorldPoint(path[i]).danger > 0 || grid.dynamicUnwalkable.Contains(grid.NodeFromWorldPoint(path[i]))) {
+            if (grid.NodeFromWorldPoint(path[i]).danger > 0) {
                 return false;
             }
         }

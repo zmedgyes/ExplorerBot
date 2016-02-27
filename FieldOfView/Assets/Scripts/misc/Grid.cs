@@ -15,8 +15,8 @@ public class Grid : MonoBehaviour
 
     public List<Node> path;
 
-    public List<Node> unwalkable;
-    public List<Node> dynamicUnwalkable;
+    //public List<Node> unwalkable;
+    //public List<Node> dynamicUnwalkable;
 
     public List<Node> virtualBorder;
     public List<Node> realBorder;
@@ -31,8 +31,8 @@ public class Grid : MonoBehaviour
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
-        unwalkable = new List<Node>();
-        dynamicUnwalkable = new List<Node>();
+        //unwalkable = new List<Node>();
+        //dynamicUnwalkable = new List<Node>();
         virtualBorder = new List<Node>();
         realBorder = new List<Node>();
         CreateGrid();
@@ -136,8 +136,6 @@ public class Grid : MonoBehaviour
                     else if (n.danger > 0) { Gizmos.color = Color.green; }
                     else { Gizmos.color = Color.white; }
                     if (n.seen && drawSeenGizmos) { Gizmos.color = Color.cyan; }
-                    if (dynamicUnwalkable.Contains(n))
-                       Gizmos.color = Color.black;
                     if (!n.walkable) { Gizmos.color = Color.red; }
                     Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - .1f));
                  }
@@ -145,14 +143,4 @@ public class Grid : MonoBehaviour
         }
     }
 
-    public void updatePlayerPositions(Transform currentObject)
-    {
-        List<Node> playerPos = new List<Node>();
-        foreach(Transform g in playerList)
-        {
-            if(g!=currentObject)
-            playerPos.AddRange(nodesInRadius(g.position, 1));
-        }
-        dynamicUnwalkable = playerPos;
-    }
 }

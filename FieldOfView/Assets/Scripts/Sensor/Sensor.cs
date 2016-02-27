@@ -27,6 +27,7 @@ public class Sensor : MonoBehaviour
 
     List<Node> unwalkable= new List<Node>();
     List<Node> walkable = new List<Node>();
+
     // Use this for initialization
     void Start()
     {
@@ -59,7 +60,6 @@ public class Sensor : MonoBehaviour
                 }
                 else {
                     unwalkable.Add(grid.NodeFromWorldPoint(hit.point));
-                    //unwalkable.AddRange(grid.nodesInRadius(hit.point, 1.0f));
                 }
 
             }

@@ -14,7 +14,6 @@ public class BFSNewTarget : MonoBehaviour
     void Awake()
     {
         requestManager = GetComponent<NewTargetManager>();
-        //grid = GetComponent<Grid>();
     }
 
 
@@ -50,8 +49,7 @@ public class BFSNewTarget : MonoBehaviour
 
                         foreach (Node node in neighbours)
                         {
-                            if (node.danger == 0 && !node.visited && !visitedNodes.Contains(node) && !grid.dynamicUnwalkable.Contains(node)
-                                )
+                            if (node.danger == 0 && !node.visited && !visitedNodes.Contains(node))
                             {
                                 if (available.Contains(node))
                                 {

@@ -14,6 +14,8 @@ public class ProtocolServer : MonoBehaviour {
     public float targetRepelRadius = 1;
 
     List<Node> available = new List<Node>();
+    bool finished = false;
+
     // Use this for initialization
     void Start () {
 	
@@ -21,12 +23,31 @@ public class ProtocolServer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        //ha egyik kliensnek sincs targetje, akkor nincs több target
+        bool targetsAvailable = false;
+	    foreach(ProtocolClient client in clients){
+            if (client.getTargetSuccess())
+            {
+                targetsAvailable = true;
+                break;
+            }
+        }
+        if (!targetsAvailable)
+        {
+            if (!finished)
+            {
+                print("no more target");
+                finished = true;
+            }
+        }
 	}
 
     public void requestNewTarget(ProtocolClient client, Action<Node, bool> callback) {
         available = new List<Node>();
+        //virtualborder frissítése
         clearVirtualBorder();
+
+        //a dinamikusan tiltott elemek kiszedése a virtualborder-ből
         HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client);
         HashSet<Node> targetRepels = getOtherTargetRepels(client);
         foreach (Node n in virtualBorder)
@@ -35,6 +56,7 @@ public class ProtocolServer : MonoBehaviour {
                 available.Add(n);
             }
         }
+
         NewTargetManager.RequestTarget(client.transform.position, available, callback);
     }
 
@@ -43,7 +65,8 @@ public class ProtocolServer : MonoBehaviour {
     }
 
     public void uploadSensorData(List<Node> walkable,List<Node> unwalkable,ProtocolClient client) {
-        foreach(Node n in unwalkable)
+        //járhatatlanok és környezetük blokkolása
+        foreach (Node n in unwalkable)
         {
             n.walkable = false;
             n.danger = 1;
@@ -54,37 +77,31 @@ public class ProtocolServer : MonoBehaviour {
                 node.danger = 1;
                 node.seen=true;
             }
-            //virtualBorder.Remove(n);
         }
-
+        //járhatóak megjelölése
         foreach (Node n in walkable)
         {
-            //n.walkable = true;
             n.seen = true;
             realBorder.Remove(n);
             if (isVirtualBorder(n)){
                 virtualBorder.Add(n);
             }
-            else{
-               // virtualBorder.Remove(n);
-            }
+  
         }
+        //az eszköz által lefedett területet látottnak feltételezzük
         foreach (Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
         {
-            //n.walkable = true;
             n.seen = true;
             realBorder.Remove(n);
             if (isVirtualBorder(n))
             {
                 virtualBorder.Add(n);
             }
-            else {
-                // virtualBorder.Remove(n);
-            }
         }
 
     }
 
+    //megállapítja, hogy van-e nem látott az adott node közvetlen környezetében
     bool isVirtualBorder(Node n){
         List<Node> neighbours = grid.GetNeighbours(n);
         foreach (Node node in neighbours)
@@ -97,6 +114,7 @@ public class ProtocolServer : MonoBehaviour {
         return false;
     }
 
+    //a virtualBorder-ből kiszedi a nem odavaló elemeket
     void clearVirtualBorder()
     {
         HashSet<Node> temp = new HashSet<Node>();
@@ -109,6 +127,7 @@ public class ProtocolServer : MonoBehaviour {
         virtualBorder = temp;
     }
 
+    //visszatér azokkal a node-okkal amiket a requester-en kívül a többi eszköz lefed
     public HashSet<Node> getDynamicUnwalkable(ProtocolClient requester) {
         HashSet<Node> ret = new HashSet<Node>();
         foreach(ProtocolClient client in clients)
@@ -124,6 +143,7 @@ public class ProtocolServer : MonoBehaviour {
         return ret;
     }
 
+    //visszatér a requester-en kívüli eszközök targetjei által blokkolt node-okkal
     public HashSet<Node> getOtherTargetRepels(ProtocolClient requester)
     {
         
@@ -141,14 +161,13 @@ public class ProtocolServer : MonoBehaviour {
         return ret;
     }
 
+
+    //virtualBorder kirajzolása
     void OnDrawGizmos()
     {
         Gizmos.color = Color.black;
-        foreach (Node n in available)
-                {
-  
-                    Gizmos.DrawCube(n.worldPosition, Vector3.one*0.1f);
-                }
-       
+        foreach (Node n in available){
+            Gizmos.DrawCube(n.worldPosition, Vector3.one*0.1f);
+        }
     }
 }

@@ -264,7 +264,7 @@ public class VisionSensor : MonoBehaviour
                             if (no.danger < 1) 
                                 no.danger++;
 
-                            grid.unwalkable.Add(no);
+                            //grid.unwalkable.Add(no);
                         }
                         foreach (Node no in grid.nodesInRadius(center, 0.5f))
                         {

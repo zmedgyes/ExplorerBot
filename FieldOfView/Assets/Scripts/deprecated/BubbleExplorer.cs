@@ -62,8 +62,8 @@ public class BubbleExplorer : MonoBehaviour {
            
             }
             else {
-                grid.updatePlayerPositions(transform);
-                if (dest.danger > 0 || dest.visited || grid.dynamicUnwalkable.Contains(dest))
+                //grid.updatePlayerPositions(transform);
+                if (dest.danger > 0 || dest.visited)
                 {
           
             

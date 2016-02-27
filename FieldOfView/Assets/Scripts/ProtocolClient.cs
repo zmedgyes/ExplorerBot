@@ -23,8 +23,9 @@ public class ProtocolClient : MonoBehaviour {
 
     bool pathSuccess = false;
     bool targetSuccess = true;
+    bool waitAndNewTargetCalled = false;
 
-    bool finished = false;
+
     bool dataSent = false;
 
     public Transform targetIndicator;
@@ -104,17 +105,17 @@ public class ProtocolClient : MonoBehaviour {
         }
         //ha nincs elérhető target
         if (!targetSuccess){
-            if (!finished){
-                print("no more target");
-                finished = true;
+            //ha nem hítunk még új target-et   
+            if (!waitAndNewTargetCalled){
+                waitAndNewTargetCalled = true;
+                //5mp várás, utána új target keresése
+                StartCoroutine(WaitAndNewPath(5));
             }
-            StartCoroutine(WaitAndNewPath(5));
         }
 	}
 
+    //a hátralévő út járhatóságának ellenőrzése
     bool checkPath() {
-        //TODO
-        //grid.updatePlayerPositions(transform);
         for (int i = currentWaypoint; i < path.Count; i++)
         {
             if (path[i].danger > 0 || server.getDynamicUnwalkable(this).Contains(path[i])){
@@ -124,16 +125,19 @@ public class ProtocolClient : MonoBehaviour {
         return true;
     }
 
+    //új útvonal igénylése adott target-hez
     void getNewPath(Node target){
         pathRequestPending = true;
         server.requestNewPath(this, target, OnPathFound);
     }
 
+    //új target igénylése
     void getNewTarget(){
         targetRequestPending = true;
         server.requestNewTarget(this, OnTargetFound);
     }
 
+    //ellenőrzi, hogy elértük-e az aktuális waypoint-ot az útvonalon
     bool waypointReached(){
         int i = 0;
         for (i=0; i < path.Count; i++)
@@ -150,6 +154,7 @@ public class ProtocolClient : MonoBehaviour {
         return false;
     }
 
+    //sensoradatok feltöltése a serverre
     void uploadSensorDataToServer(){
         if ((lastUnwalkable.Count + lastWalkable.Count) > 0)
         {
@@ -162,6 +167,7 @@ public class ProtocolClient : MonoBehaviour {
         
     }
 
+    //!! új útvonal elkészülése esetén hívott fgv
     public void OnPathFound(List<Node> newPath, bool pathSuccessful)
     {
         pathRequestPending = false;
@@ -172,8 +178,10 @@ public class ProtocolClient : MonoBehaviour {
         }
     }
 
+    //!! új target elkészülése után hívott fgv
     public void OnTargetFound(Node newTarget, bool targetSuccessful)
     {
+        waitAndNewTargetCalled = false;
         targetRequestPending = false;
         targetSuccess = targetSuccessful;
         if (targetSuccessful){
@@ -185,6 +193,7 @@ public class ProtocolClient : MonoBehaviour {
         }
     }
 
+    //megállapítja, hogy most járhatatlanan mezőn állunk-e
     bool wrongPosition()
     {
         Node currentNode = grid.NodeFromWorldPoint(transform.position);
@@ -195,6 +204,7 @@ public class ProtocolClient : MonoBehaviour {
         return false;
     }
 
+    //visszavezet az útra
     void rescue()
     {
         int i;
@@ -209,16 +219,19 @@ public class ProtocolClient : MonoBehaviour {
         }
     }
 
-    IEnumerator WaitAndNewPath(int sec)
+    public bool getTargetSuccess()
     {
-        //while (true)
-        //{
-            yield return new WaitForSeconds(sec);
-            getNewTarget();
-        //}
+        return targetSuccess;
     }
 
+    //5mp várá utána új target igénylése
+    IEnumerator WaitAndNewPath(int sec)
+    {
+            yield return new WaitForSeconds(sec);
+            getNewTarget();
+    }
 
+    //hátralévő útvonal kirajzolása
     public void OnDrawGizmos()
     {
         if (path != null)

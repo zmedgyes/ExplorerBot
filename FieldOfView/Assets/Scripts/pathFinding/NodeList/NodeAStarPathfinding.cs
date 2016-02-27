@@ -14,7 +14,6 @@ public class NodeAStarPathfinding : MonoBehaviour
     void Awake()
     {
         requestManager = GetComponent<NodePathRequestManager>();
-        //grid = GetComponent<Grid>();
     }
 
 
@@ -32,12 +31,10 @@ public class NodeAStarPathfinding : MonoBehaviour
         List<Node> waypoints = new List<Node>();
         bool pathSuccess = false;
 
-        if (grid == null) { print("null"); }
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
         if (targetNode.danger < 1 && targetNode.walkable)
-        //if (startNode.walkable && targetNode.walkable)
         {
             Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();
@@ -59,7 +56,6 @@ public class NodeAStarPathfinding : MonoBehaviour
                 foreach (Node neighbour in grid.GetNeighbours(currentNode))
                 {
                     if (neighbour.danger > 0 || !neighbour.walkable || closedSet.Contains(neighbour) || dynamicBlocked.Contains(neighbour))
-                    //if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
                         continue;
                     }
