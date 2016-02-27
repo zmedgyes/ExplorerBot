@@ -13,6 +13,7 @@ public class Sensor : MonoBehaviour
     public LayerMask targetMask;
     public LayerMask obstacleMask;
     public LayerMask viewMask;
+    LayerMask hitMask;
 
     [HideInInspector]
     public List<Transform> visibleTargets = new List<Transform>();
@@ -34,6 +35,8 @@ public class Sensor : MonoBehaviour
         viewMesh = new Mesh();
         viewMesh.name = "View Mesh";
         viewMeshFilter.mesh = viewMesh;
+        //hitMask = obstacleMask;
+        hitMask = obstacleMask | targetMask;
     }
 
     // Update is called once per frame
@@ -53,7 +56,7 @@ public class Sensor : MonoBehaviour
             if (Mathf.Abs(Vector3.Angle((n.worldPosition - transform.position), (transform.forward))) < viewAngle / 2
                      && Vector3.Distance(n.worldPosition, transform.position) < viewRadius)
             {
-                if (!Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), obstacleMask))
+                if (!Physics.Raycast(ray, out hit, Vector3.Distance(transform.position, n.worldPosition), hitMask))
                 {
                     walkable.Add(n);
                   
@@ -169,7 +172,7 @@ public class Sensor : MonoBehaviour
         Vector3 dir = DirFromAngle(globalAngle, true);
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, dir, out hit, viewRadius, obstacleMask))
+        if (Physics.Raycast(transform.position, dir, out hit, viewRadius, hitMask))
         {
             return new ViewCastInfo(true, hit.point, hit.distance, globalAngle);
         }

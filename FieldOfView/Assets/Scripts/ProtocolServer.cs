@@ -12,6 +12,7 @@ public class ProtocolServer : MonoBehaviour {
     public List<ProtocolClient> clients= new List<ProtocolClient>();
     public Grid grid;
     public float targetRepelRadius = 1;
+    public bool selfAwareness = true;
 
     List<Node> available = new List<Node>();
     bool finished = false;
@@ -38,6 +39,9 @@ public class ProtocolServer : MonoBehaviour {
             {
                 print("no more target");
                 finished = true;
+                foreach (ProtocolClient client in clients){
+                    client.turnOff();
+                }
             }
         }
 	}
@@ -48,7 +52,7 @@ public class ProtocolServer : MonoBehaviour {
         clearVirtualBorder();
 
         //a dinamikusan tiltott elemek kiszedése a virtualborder-ből
-        HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client);
+        HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client,2);
         HashSet<Node> targetRepels = getOtherTargetRepels(client);
         foreach (Node n in virtualBorder)
         {
@@ -57,25 +61,31 @@ public class ProtocolServer : MonoBehaviour {
             }
         }
 
-        NewTargetManager.RequestTarget(client.transform.position, available, callback);
+        NewTargetManager.RequestTarget(client.transform.position, available, dynamicBlocked, callback);
     }
 
     public void requestNewPath(ProtocolClient client, Node pathEnd, Action<List<Node>, bool> callback) {
-        NodePathRequestManager.RequestPath(client.transform.position, pathEnd.worldPosition,getDynamicUnwalkable(client), callback);
+        NodePathRequestManager.RequestPath(client.transform.position, pathEnd.worldPosition,getDynamicUnwalkable(client,2), callback);
     }
 
     public void uploadSensorData(List<Node> walkable,List<Node> unwalkable,ProtocolClient client) {
+        HashSet<Node> dynamicBlocked = getDynamicUnwalkable(client,1.6f);
+
         //járhatatlanok és környezetük blokkolása
         foreach (Node n in unwalkable)
         {
-            n.walkable = false;
-            n.danger = 1;
             n.seen = true;
-            realBorder.Add(n);
-            foreach (Node node in grid.nodesInRadius(n.worldPosition,client.bodyRadius))
+            //ha nem egy másik eszköztlát
+            if (!dynamicBlocked.Contains(n))
             {
-                node.danger = 1;
-                node.seen=true;
+                n.walkable = false;
+                n.danger = 1;
+                realBorder.Add(n);
+                foreach (Node node in grid.nodesInRadius(n.worldPosition, client.bodyRadius))
+                {
+                    node.danger = 1;
+                    node.seen = true;
+                }
             }
         }
         //járhatóak megjelölése
@@ -88,14 +98,17 @@ public class ProtocolServer : MonoBehaviour {
             }
   
         }
+
         //az eszköz által lefedett területet látottnak feltételezzük
-        foreach (Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
-        {
-            n.seen = true;
-            realBorder.Remove(n);
-            if (isVirtualBorder(n))
+        if (selfAwareness){
+            foreach (Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
             {
-                virtualBorder.Add(n);
+                n.seen = true;
+                realBorder.Remove(n);
+                if (isVirtualBorder(n))
+                {
+                    virtualBorder.Add(n);
+                }
             }
         }
 
@@ -128,13 +141,13 @@ public class ProtocolServer : MonoBehaviour {
     }
 
     //visszatér azokkal a node-okkal amiket a requester-en kívül a többi eszköz lefed
-    public HashSet<Node> getDynamicUnwalkable(ProtocolClient requester) {
+    public HashSet<Node> getDynamicUnwalkable(ProtocolClient requester, float rangeMultiplier) {
         HashSet<Node> ret = new HashSet<Node>();
         foreach(ProtocolClient client in clients)
         {
             if (client != requester)
             {
-                foreach(Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius))
+                foreach(Node n in grid.nodesInRadius(client.transform.position, client.bodyRadius*rangeMultiplier))
                 {
                     ret.Add(n);
                 }

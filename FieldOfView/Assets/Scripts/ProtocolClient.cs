@@ -25,6 +25,7 @@ public class ProtocolClient : MonoBehaviour {
     bool targetSuccess = true;
     bool waitAndNewTargetCalled = false;
 
+    bool run = true;
 
     bool dataSent = false;
 
@@ -43,73 +44,86 @@ public class ProtocolClient : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
-        uploadSensorDataToServer();
-        
-        //ha nem( útra várás || targetre várás || nincs elérhető target)
-        if (!(pathRequestPending || targetRequestPending || !targetSuccess)){
-            //ha nem indulás
-            if (path != null) {
-                
-                //ha új target van
-                if (!target.Equals(lastTarget)) {
-                    getNewPath(target);
-                    lastTarget = target;
-                }
-                //ha nincs új target
-                else {
-                    //ha rossz a jelenlegi út 
-                    if (!checkPath()) {
-                        if (wrongPosition())
-                        {
-                            rescue();
-                        }
-                        if (!pathSuccess) {
-                            getNewTarget(); //ha nem létezik út a jelenlegi célhoz
-                        }
-                        else {
-                            getNewPath(path[path.Count - 1]); //ha létezik út a jelenlegi célhoz
-                        }
+        if (run)
+        {
+            uploadSensorDataToServer();
+
+            //ha nem( útra várás || targetre várás || nincs elérhető target)
+            if (!(pathRequestPending || targetRequestPending || !targetSuccess))
+            {
+                //ha nem indulás
+                if (path != null)
+                {
+
+                    //ha új target van
+                    if (!target.Equals(lastTarget))
+                    {
+                        getNewPath(target);
+                        lastTarget = target;
                     }
-                    //ha jó a jelenlegi út
+                    //ha nincs új target
                     else {
-
-                        controller.moveTo(path[currentWaypoint].worldPosition);
-
-                        //ha elértük az aktuális waypointot
-                        if (waypointReached()) {
-                            //ha az elért pont a target
-                            if (path.Count.Equals(currentWaypoint + 1)) {
-                                getNewTarget();
+                        //ha rossz a jelenlegi út 
+                        if (!checkPath())
+                        {
+                            if (wrongPosition())
+                            {
+                                rescue();
+                            }
+                            if (!pathSuccess)
+                            {
+                                getNewTarget(); //ha nem létezik út a jelenlegi célhoz
                             }
                             else {
-                                currentWaypoint++;
-                                controller.moveTo(path[currentWaypoint].worldPosition);
+                                getNewPath(path[path.Count - 1]); //ha létezik út a jelenlegi célhoz
+                            }
+                        }
+                        //ha jó a jelenlegi út
+                        else {
+
+                            controller.moveTo(path[currentWaypoint].worldPosition);
+
+                            //ha elértük az aktuális waypointot
+                            if (waypointReached())
+                            {
+                                //ha az elért pont a target
+                                if (path.Count.Equals(currentWaypoint + 1))
+                                {
+                                    getNewTarget();
+                                }
+                                else {
+                                    currentWaypoint++;
+                                    controller.moveTo(path[currentWaypoint].worldPosition);
+                                }
                             }
                         }
                     }
                 }
-            }
-            //ha indulás
-            else {
-                //ha van már target
-                if (target!=null) {
-                    getNewPath(target);
-                    lastTarget = target;
-                }
-                //ha még nincs target
+                //ha indulás
                 else {
-                    if(dataSent)
-                    getNewTarget();
+                    //ha van már target
+                    if (target != null)
+                    {
+                        getNewPath(target);
+                        lastTarget = target;
+                    }
+                    //ha még nincs target
+                    else {
+                        if (dataSent)
+                            getNewTarget();
+                    }
                 }
             }
-        }
-        //ha nincs elérhető target
-        if (!targetSuccess){
-            //ha nem hítunk még új target-et   
-            if (!waitAndNewTargetCalled){
-                waitAndNewTargetCalled = true;
-                //5mp várás, utána új target keresése
-                StartCoroutine(WaitAndNewPath(5));
+            //ha nincs elérhető target
+            if (!targetSuccess)
+            {
+                //ha nem hítunk még új target-et   
+                if (!waitAndNewTargetCalled)
+                {
+                    waitAndNewTargetCalled = true;
+                    //5mp várás, utána új target keresése
+                    StartCoroutine(WaitAndNewPath(5));
+                }
             }
         }
 	}
@@ -118,7 +132,7 @@ public class ProtocolClient : MonoBehaviour {
     bool checkPath() {
         for (int i = currentWaypoint; i < path.Count; i++)
         {
-            if (path[i].danger > 0 || server.getDynamicUnwalkable(this).Contains(path[i])){
+            if (path[i].danger > 0 || server.getDynamicUnwalkable(this,2).Contains(path[i])){
                 return false;
             }
         }
@@ -222,6 +236,15 @@ public class ProtocolClient : MonoBehaviour {
     public bool getTargetSuccess()
     {
         return targetSuccess;
+    }
+
+    public void turnOff() {
+        run = false;
+    }
+
+    public void turnOn()
+    {
+        run = true;
     }
 
     //5mp várá utána új target igénylése

@@ -20,9 +20,9 @@ public class NewTargetManager : MonoBehaviour
         targeting = GetComponent<BFSNewTarget>();
     }
 
-    public static void RequestTarget(Vector3 position, List<Node> available, Action<Node, bool> callback)
+    public static void RequestTarget(Vector3 position, List<Node> available, HashSet<Node> dynamicBlocked, Action<Node, bool> callback)
     {
-        TargetRequest newRequest = new TargetRequest(position, available, callback);
+        TargetRequest newRequest = new TargetRequest(position, available, dynamicBlocked, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
         instance.TryProcessNext();
     }
@@ -33,7 +33,7 @@ public class NewTargetManager : MonoBehaviour
         {
             currentPathRequest = pathRequestQueue.Dequeue();
             isProcessingPath = true;
-            targeting.StartFindTarget(currentPathRequest.position, currentPathRequest.available);
+            targeting.StartFindTarget(currentPathRequest.position, currentPathRequest.available, currentPathRequest.dynamicBlocked);
         }
     }
 
@@ -48,13 +48,15 @@ public class NewTargetManager : MonoBehaviour
     {
         public Vector3 position;
         public List<Node> available;
+        public HashSet<Node> dynamicBlocked;
         public Action<Node, bool> callback;
 
-        public TargetRequest(Vector3 _start, List<Node> _available, Action<Node, bool> _callback)
+        public TargetRequest(Vector3 _start, List<Node> _available, HashSet<Node> _dynamicBlocked, Action<Node, bool> _callback)
         {
             position = _start;
             available = _available;
             callback = _callback;
+            dynamicBlocked = _dynamicBlocked;
         }
 
     }

@@ -17,12 +17,12 @@ public class BFSNewTarget : MonoBehaviour
     }
 
 
-    public void StartFindTarget(Vector3 startPos, List<Node> available)
+    public void StartFindTarget(Vector3 startPos, List<Node> available, HashSet<Node> dynamicBlocked)
     {
-        StartCoroutine(FindTarget(startPos, available));
+        StartCoroutine(FindTarget(startPos, available, dynamicBlocked));
     }
 
-    IEnumerator FindTarget(Vector3 startPos, List<Node> available)
+    IEnumerator FindTarget(Vector3 startPos, List<Node> available, HashSet<Node> dynamicBlocked)
     {
 
         Stopwatch sw = new Stopwatch();
@@ -49,7 +49,7 @@ public class BFSNewTarget : MonoBehaviour
 
                         foreach (Node node in neighbours)
                         {
-                            if (node.danger == 0 && !node.visited && !visitedNodes.Contains(node))
+                            if (node.danger == 0 && !node.visited && !visitedNodes.Contains(node) && !dynamicBlocked.Contains(node))
                             {
                                 if (available.Contains(node))
                                 {
