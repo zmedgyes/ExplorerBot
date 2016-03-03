@@ -70,7 +70,7 @@ public class GraphAStarPathfinding : MonoBehaviour
                     {
                         neighbour.gCost = newMovementCostToNeighbour;
                         neighbour.hCost = Vector3.Distance(neighbour.worldPosition,targetNode.worldPosition);
-                        neighbour.parent = currentNode;
+                        neighbour.successor = currentNode;
 
                         if (!openSet.Contains(neighbour))
                             openSet.Add(neighbour);
@@ -97,7 +97,7 @@ public class GraphAStarPathfinding : MonoBehaviour
         while (currentNode != startNode)
         {
             path.Add(currentNode);
-            currentNode = currentNode.parent;
+            currentNode = currentNode.successor;
         }
         /*Vector3[] waypoints = SimplifyPath(path);
         Array.Reverse(waypoints);*/
