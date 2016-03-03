@@ -73,12 +73,16 @@
     <Compile Include="Assets\Scripts\deprecated\FieldOfView.cs" />
     <Compile Include="Assets\Scripts\misc\Grid.cs" />
     <Compile Include="Assets\Scripts\misc\Heap.cs" />
+    <Compile Include="Assets\Scripts\misc\ListHeap.cs" />
     <Compile Include="Assets\Scripts\misc\Node.cs" />
+    <Compile Include="Assets\Scripts\misc\QuadTree.cs" />
+    <Compile Include="Assets\Scripts\misc\QuadTreeNode.cs" />
     <Compile Include="Assets\Scripts\movement\ManualController.cs" />
     <Compile Include="Assets\Scripts\movement\MovementController.cs" />
     <Compile Include="Assets\Scripts\movement\Unit.cs" />
     <Compile Include="Assets\Scripts\pathFinding\General\AStarPathfinding.cs" />
     <Compile Include="Assets\Scripts\pathFinding\General\PathRequestManager.cs" />
+    <Compile Include="Assets\Scripts\pathFinding\Graphbased\GraphAStarPathfinding.cs" />
     <Compile Include="Assets\Scripts\pathFinding\List\ListAStarPathfinding.cs" />
     <Compile Include="Assets\Scripts\pathFinding\List\ListPathRequestManager.cs" />
     <Compile Include="Assets\Scripts\pathFinding\New Target\BFSNewTarget.cs" />
