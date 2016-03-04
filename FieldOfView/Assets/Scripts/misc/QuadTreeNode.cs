@@ -174,12 +174,13 @@ public class QuadTreeNode : IHeapItem<QuadTreeNode>
         Vector3 tmpVec;
         QuadTreeNode tmpNode;
 
+        
         int iterationDifference = tree.maxIterationCount - iterationCount;
 
         if (iterationDifference > 0)
         {
-           
-            for (int i = 0; i <= iterationDifference; i++)
+            int steps = Mathf.RoundToInt(Mathf.Pow(2, iterationDifference - 1));
+            for (int i = 0; i <= steps; i++)
             {
                 //top left
                 tmpVec = worldPosition + new Vector3((2 * i + 1) * tree.minCellRadius, 0, radius + tree.minCellRadius);
