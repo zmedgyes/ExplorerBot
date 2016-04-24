@@ -30,6 +30,8 @@ public class ProtocolClient : MonoBehaviour {
     bool dataSent = false;
 
     public Transform targetIndicator;
+    
+    PerformanceCalculator recentlyPerformance;
 
     // Use this for initialization
     void Start () {
@@ -38,12 +40,14 @@ public class ProtocolClient : MonoBehaviour {
         //self = transform;
         server.clients.Add(this);
         grid = server.grid;
+        recentlyPerformance = GetComponent<PerformanceCalculator>();
+        recentlyPerformance.AddPositions(transform.position);
 
-	}
+    }
 
     // Update is called once per frame
     void Update() {
-
+        
         if (run)
         {
             uploadSensorDataToServer();
@@ -82,6 +86,7 @@ public class ProtocolClient : MonoBehaviour {
                         else {
 
                             controller.moveTo(path[currentWaypoint].worldPosition);
+                            recentlyPerformance.AddPositions(transform.position);
 
                             //ha elértük az aktuális waypointot
                             if (waypointReached())
@@ -90,10 +95,12 @@ public class ProtocolClient : MonoBehaviour {
                                 if (path.Count.Equals(currentWaypoint + 1))
                                 {
                                     getNewTarget();
+                                    recentlyPerformance.TimeAdd();
                                 }
                                 else {
                                     currentWaypoint++;
                                     controller.moveTo(path[currentWaypoint].worldPosition);
+                                    recentlyPerformance.AddPositions(transform.position);
                                 }
                             }
                         }
@@ -275,4 +282,3 @@ public class ProtocolClient : MonoBehaviour {
         }
     }
 }
-
