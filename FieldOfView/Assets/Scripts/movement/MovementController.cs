@@ -7,11 +7,12 @@ public class MovementController : MonoBehaviour {
     public float rotationUnit;
     public int maxRotationSpeed;
     public int rotationDirectionDifference;
-    public int movementSpeed;
+    private int movementSpeed;
 
     Vector3 target;
     Rigidbody rb;
     Vector3 height;
+    
 
     // Use this for initialization
     void Start () {
@@ -59,5 +60,10 @@ public class MovementController : MonoBehaviour {
             return true;
         }
         return false;
+    }
+
+    public void setMovementSpeed(float speed)
+    {
+        movementSpeed = (int)speed;
     }
 }

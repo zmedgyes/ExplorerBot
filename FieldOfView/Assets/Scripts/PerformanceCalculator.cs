@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -22,13 +21,16 @@ public class PerformanceCalculator : MonoBehaviour {
     private List<Vector3> vectors = new List<Vector3>();
     private List<System.DateTime> wholeTime = new List<System.DateTime>();
 
+    VariableScheduler variables;
+
     // Use this for initialization
     void Start () {
+        variables = GetComponent<VariableScheduler>();
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         currentPosition = transform.position - height;
         vectors.Add(currentPosition);
         rb = GetComponent<Rigidbody>();
-        speed = 0;
+        speed = variables.getMinSpeed();
         hour = 0.0f;
         min = 0.0f;
         sec = 0.0f;
@@ -38,12 +40,18 @@ public class PerformanceCalculator : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
+        SpeedCalc();
     }
 
-    public void GetPosition()
+    void SpeedCalc()
     {
-        return;
+        float T = 25;
+        speed = variables.getMinSpeed()*(1 - Mathf.Pow(2.71828f,  -(variables.getESC() / T)));      //egytárolós lengő tag.
+        print(variables.getMinSpeed());
+        print(Mathf.Pow(2.71828f, (variables.getESC() / T)));
+        print(1 - Mathf.Pow(2.71828f, (variables.getESC() / T)));
+        print(speed);
     }
 
     public void AddPositions(Vector3 position)
@@ -93,5 +101,11 @@ public class PerformanceCalculator : MonoBehaviour {
     public void UpdateText()
     {
         performanceText.text = "Way: " + way + "\nSpeed: " + speed + "\nPower: " + "" + "\ndiffTime: " + hour + ":" + min + ":" + sec;
+        //performanceText.text += "\nESCTemp: " + variables.tempESC + "\n";
+    }
+
+    public float getSpeed()
+    {
+        return speed;
     }
 }

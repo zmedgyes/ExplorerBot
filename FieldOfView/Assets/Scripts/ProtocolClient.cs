@@ -42,12 +42,13 @@ public class ProtocolClient : MonoBehaviour {
         grid = server.grid;
         recentlyPerformance = GetComponent<PerformanceCalculator>();
         recentlyPerformance.AddPositions(transform.position);
+        controller.setMovementSpeed(recentlyPerformance.getSpeed());
 
     }
 
     // Update is called once per frame
     void Update() {
-        
+        controller.setMovementSpeed(recentlyPerformance.getSpeed());
         if (run)
         {
             uploadSensorDataToServer();
