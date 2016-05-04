@@ -97,11 +97,13 @@ public class ProtocolClient : MonoBehaviour {
                                 {
                                     getNewTarget();
                                     recentlyPerformance.TimeAdd();
+                                    recentlyPerformance.ClearLists();
                                 }
                                 else {
                                     currentWaypoint++;
                                     controller.moveTo(path[currentWaypoint].worldPosition);
                                     recentlyPerformance.AddPositions(transform.position);
+                                    recentlyPerformance.ClearLists();
                                 }
                             }
                         }
@@ -125,7 +127,7 @@ public class ProtocolClient : MonoBehaviour {
             //ha nincs elérhető target
             if (!targetSuccess)
             {
-                //ha nem hítunk még új target-et   
+                //ha nem hívtunk még új target-et   
                 if (!waitAndNewTargetCalled)
                 {
                     waitAndNewTargetCalled = true;
