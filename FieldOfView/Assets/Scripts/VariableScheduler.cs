@@ -20,6 +20,8 @@ public class VariableScheduler : MonoBehaviour {
     const int operatingCurrent = 80;    //[A]
     const int boostTiming = 60;     //0deg~60deg
     const int turboSlope = 30;      //30[deg/s]=3[deg/0.1s]
+    const int currentBEC = 18;      //W áganként
+    const int driveFreq = 24;       //kHz
     public float tempESC;   //[A]
 
     //Gear: Driver Ratio
@@ -98,5 +100,29 @@ public class VariableScheduler : MonoBehaviour {
     public float getESC()
     {
         return (float)operatingCurrent;
+    }
+    public int getCapacity()
+    {
+        return capacity;
+    }
+    public float getTensity()
+    {
+        return tensity;
+    }
+    public int getDriveFreq()
+    {
+        return driveFreq;
+    }
+    public int getMotorVolt()
+    {
+        return voltage;
+    }
+    public int getMotorCurr()
+    {
+        return maxCurrent;
+    }
+    public int getMotorPower()
+    {
+        return power;
     }
 }

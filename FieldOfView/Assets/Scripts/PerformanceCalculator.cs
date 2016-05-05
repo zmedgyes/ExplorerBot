@@ -11,8 +11,12 @@ public class PerformanceCalculator : MonoBehaviour {
     public GUIText performanceText;
     private float speed;
     private float moment;
+    private float power;
+    private float curPower;
+    private float curPowerPercent;
     private float way;
     private float wayFIFO;
+    private float esc;
     private System.DateTime diffTime;
     private System.DateTime otherTime;
 
@@ -37,17 +41,22 @@ public class PerformanceCalculator : MonoBehaviour {
         hour = 0.0f;
         min = 0.0f;
         sec = 0.0f;
+        esc = 0.0f;
         moment = variables.getMinSpeed();
         diffTime = System.DateTime.Now;
         otherTime = System.DateTime.Now;
         wholeTime.Add(System.DateTime.Now);
         wholeTime.Add(System.DateTime.Now);
+        Power();
+        curPower = power;
+        PowerInput();
     }
 	
 	// Update is called once per frame
 	void Update () {
         SpeedCalc();
         speedTime.Add(System.DateTime.Now);
+        PowerInput();
     }
 
     void SpeedRise()
@@ -77,8 +86,11 @@ public class PerformanceCalculator : MonoBehaviour {
     {
         SpeedRise();
         float T = 25;
+        if(moment > variables.getMaxSpeed())
+            moment = variables.getMaxSpeed();
         speed = variables.getMinSpeed()*(1 - Mathf.Pow(2.71828f,  -(variables.getESC() / T)));      //egytárolós lengő tag.
-        if(speed > variables.getMaxSpeed())
+        //speed = moment * (1 - Mathf.Pow(2.71828f, -(variables.getESC() / T)));      //egytárolós lengő tag.
+        if (speed > variables.getMaxSpeed())
         {
             speed = variables.getMaxSpeed();
         }
@@ -129,9 +141,10 @@ public class PerformanceCalculator : MonoBehaviour {
         float x=0.0f, z=0.0f;
         for (int i = 1; i < vectors.Count; i++)
         {
-            x += Mathf.Abs(Mathf.Abs(vectors[i].x)- Mathf.Abs(vectors[i-1].x));
-            z += Mathf.Abs(Mathf.Abs(vectors[i].z) - Mathf.Abs(vectors[i - 1].z));
+            x += Mathf.Abs(vectors[i].x - vectors[i - 1].x);
+            z += Mathf.Abs(vectors[i].z - vectors[i - 1].z);
         }
+        //}
         /*for (int i = 0; i < wholeTime.Count; i++)
         {
             diffTime += wholeTime[i];
@@ -144,12 +157,27 @@ public class PerformanceCalculator : MonoBehaviour {
 
     public void UpdateText()
     {
-        performanceText.text = "Way: " + way + "\nSpeed: " + speed + "\nPower: " + "" + "\ndiffTime: " + hour + ":" + min + ":" + sec;
+        performanceText.text = "Way: " + way + "\nSpeed: " + speed + "\nPower: " + curPowerPercent + "%\ndiffTime: " + hour + ":" + min + ":" + sec;
         //performanceText.text += "\nESCTemp: " + variables.tempESC + "\n";
     }
 
     public float getSpeed()
     {
         return speed;
+    }
+
+    void Power()
+    {
+        power = variables.getTensity() * variables.getCapacity();   //mWh
+    }
+
+    void PowerInput()
+    {
+        float F = variables.getMotorPower() * 900 / variables.getMaxSpeed();    //mN
+        float minTime = power / (variables.getMotorPower() * 1000);
+        float P = F * speed;        //felvett teljesítmény mW-ban
+        curPower -= P;
+        curPowerPercent = curPower / (power * (60 * 60)) * 100;
+        print("F:" + F + " P: " + P + " curPower: " + curPower);
     }
 }
