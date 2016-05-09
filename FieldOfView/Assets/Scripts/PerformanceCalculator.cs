@@ -57,41 +57,54 @@ public class PerformanceCalculator : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        speedTime.Add(System.DateTime.Now);
         PowerInput();
     }
 
     void SpeedRise()
     {
-        List<float> avg = new List<float>();
-        System.DateTime time = System.DateTime.Now;
-        speedTime.Add(time);
-        bool chg = false;
-        if (wayFIFO.Count >= 2)
+        if (curPowerPercent >= 0.0f)
         {
-            if (wayFIFO[wayFIFO.Count - 1] != wayFIFO[wayFIFO.Count - 2])
+            List<float> avg = new List<float>();
+            speedTime.Add(System.DateTime.Now);
+            bool chg = false;
+            if (wayFIFO.Count >= 2)
             {
-                chg = true;
+                if (wayFIFO[wayFIFO.Count - 1] != wayFIFO[wayFIFO.Count - 2])
+                {
+                    chg = true;
+                }
+                else
+                    chg = false;
+                float transition = wayFIFO[wayFIFO.Count - 1];
+                wayFIFO.Clear();
+                wayFIFO.Add(transition);
             }
-            else
-                chg = false;
-            float transition = wayFIFO[wayFIFO.Count - 1];
-            wayFIFO.Clear();
-            wayFIFO.Add(transition);
-        }
-        for(int i = 0; i < speedTime.Count-1; i++)
-        {
-            avg.Add(speedTime[i+1].Hour*60*60*1000 + speedTime[i + 1].Minute*60*1000 + speedTime[i + 1].Second*1000 + speedTime[i + 1].Millisecond);
-            avg.Add(speedTime[0].Hour*60*60*1000 + speedTime[0].Minute*60*1000 + speedTime[0].Second*1000 + speedTime[0].Millisecond);
-            if ((avg[0] - avg[1] > 50) && chg)
+            if (speedTime.Count >= 2)
             {
-                moment++;
+                avg.Add(speedTime[speedTime.Count - 1].Hour * 60 * 60 * 1000 + speedTime[speedTime.Count - 1].Minute * 60 * 1000 + speedTime[speedTime.Count - 1].Second * 1000 + speedTime[speedTime.Count - 1].Millisecond);
+                avg.Add(speedTime[0].Hour * 60 * 60 * 1000 + speedTime[0].Minute * 60 * 1000 + speedTime[0].Second * 1000 + speedTime[0].Millisecond);
+                if ((((avg[0] - avg[1]) / 1000) >= 0) && chg)
+                {
+                    moment += (1.0f * ((avg[0] - avg[1]) / 10));
+                }
+                else
+                    moment = variables.getMinSpeed();
+                if ((avg[0] - avg[1] < 1))
+                {
+                    System.DateTime time = speedTime[0];
+                    speedTime.Clear();
+                    speedTime.Add(time);
+                }
+                else
+                {
+                    System.DateTime time = speedTime[speedTime.Count - 1];
+                    speedTime.Clear();
+                    speedTime.Add(time);
+                }
+                avg.Clear();
             }
-            else
-                moment = 0.0f;
-            avg.Clear();
+            SpeedCalc();
         }
-        SpeedCalc();
     }
 
     public void ClearLists()
@@ -105,13 +118,14 @@ public class PerformanceCalculator : MonoBehaviour {
         float T = 25;
         //speed = variables.getMinSpeed()*(1 - Mathf.Pow(2.71828f,  -(variables.getESC() / T)));      //egytárolós lengő tag.
         speed = (moment * (1 - Mathf.Pow(2.71828f, -(escPar / T))));      //egytárolós lengő tag.
-        print("speed : " + speed + " mov: " + moment * (1 - Mathf.Pow(2.71828f, -(escPar / T))));
-        if (speed > maxSpeed)
+        /*if (speed > maxSpeed)
         {
             speed = maxSpeed;
-        }
+        }*/
         if (curPowerPercent == 0.0f)
+        {
             speed = 0;
+        }
     }
 
     public void AddPositions(Vector3 position)
@@ -170,12 +184,13 @@ public class PerformanceCalculator : MonoBehaviour {
 
     public void UpdateText()
     {
-        performanceText.text = "Way: " + way + "\navSpeed: " + speed + "\nPower: " + curPowerPercent.ToString("n2") + "%\ndiffTime: " + hour + ":" + min + ":" + sec;
+        performanceText.text = "Way: " + way.ToString("n2") + "\navSpeed: " + speed.ToString("n3") + "\nPower: " + curPowerPercent.ToString("n2") + "%\ndiffTime: " + hour + ":" + min + ":" + sec;
         //performanceText.text += "\nESCTemp: " + variables.tempESC + "\n";
     }
 
     public float getSpeed()
     {
+        SpeedCalc();
         return speed;
     }
 

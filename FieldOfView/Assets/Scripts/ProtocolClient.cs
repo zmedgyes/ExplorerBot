@@ -138,6 +138,11 @@ public class ProtocolClient : MonoBehaviour {
         }
 	}
 
+    void LateUpdate()
+    {
+        controller.setMovementSpeed(recentlyPerformance.getSpeed());
+    }
+
     //a hátralévő út járhatóságának ellenőrzése
     bool checkPath() {
         for (int i = currentWaypoint; i < path.Count; i++)
