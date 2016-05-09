@@ -19,6 +19,7 @@ public class PerformanceCalculator : MonoBehaviour {
     private float diffTime;
     private float escPar;
     private float maxSpeed;
+    private bool haveToCharge;
     private System.DateTime otherTime;
 
     private float hour;
@@ -31,9 +32,10 @@ public class PerformanceCalculator : MonoBehaviour {
     private List<System.DateTime> speedTime = new List<System.DateTime>();
 
     VariableScheduler variables;
-
+    public ChargerServer charger;
     // Use this for initialization
     void Start () {
+        charger = GetComponent<ChargerServer>();
         variables = GetComponent<VariableScheduler>();
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         currentPosition = transform.position - height;
@@ -58,6 +60,7 @@ public class PerformanceCalculator : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         PowerInput();
+        CheckCharging();
     }
 
     void SpeedRise()
@@ -197,6 +200,7 @@ public class PerformanceCalculator : MonoBehaviour {
     void Power()
     {
         power = variables.getTensity() * variables.getCapacity();   //mWh
+        print(power);
         curPower = power * 60 * 60; //mWs
         //print("curPower: " + curPower);
     }
@@ -213,4 +217,20 @@ public class PerformanceCalculator : MonoBehaviour {
             curPowerPercent = 0.0f;
         //print("power: "+power+" F:" + F + " P: " + P + " curPower: " + curPower);
     }
+    
+    public void CheckCharging()
+    {
+        float x = 0.0f, z = 0.0f;
+        Vector3 curPos = new Vector3(transform.position.x, 0.0f, transform.position.z);
+        x = Mathf.Abs(curPos.x - charger.GetPosition().x);
+        z = Mathf.Abs(curPos.z - charger.GetPosition().z);
+        float distence = Mathf.Sqrt(x * x + z * z);
+
+        if (curPowerPercent < 20.0f)
+            haveToCharge = true;
+        else
+            haveToCharge = false;
+        print(haveToCharge);
+    }
+
 }
