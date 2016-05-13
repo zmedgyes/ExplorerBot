@@ -19,6 +19,7 @@ public class PerformanceCalculator : MonoBehaviour {
     private float diffTime;
     private float escPar;
     private float maxSpeed;
+    private bool isMoving;
     private bool haveToCharge;
     private System.DateTime otherTime;
 
@@ -31,11 +32,13 @@ public class PerformanceCalculator : MonoBehaviour {
     private List<System.DateTime> wholeTime = new List<System.DateTime>();
     private List<System.DateTime> speedTime = new List<System.DateTime>();
 
+    public int accumulator;
+
     VariableScheduler variables;
     public ChargerServer charger;
     // Use this for initialization
     void Start () {
-        charger = GetComponent<ChargerServer>();
+        //charger = GetComponent<ChargerServer>();
         variables = GetComponent<VariableScheduler>();
         height = new Vector3(0.0f, transform.position.y, 0.0f);
         currentPosition = transform.position - height;
@@ -47,6 +50,7 @@ public class PerformanceCalculator : MonoBehaviour {
         min = 0.0f;
         sec = 0.0f;
         esc = 0.0f;
+        isMoving = false;
         escPar = variables.getESC();
         moment = variables.getMinSpeed();
         diffTime = 0.0f;
@@ -55,10 +59,13 @@ public class PerformanceCalculator : MonoBehaviour {
         wholeTime.Add(System.DateTime.Now);
         Power();
         PowerInput();
+        curPowerPercent = (curPower / (power * (60 * 60))) * 100;
     }
 	
 	// Update is called once per frame
 	void Update () {
+        SpeedRise();
+        UpdateText();
         PowerInput();
         CheckCharging();
     }
@@ -89,9 +96,13 @@ public class PerformanceCalculator : MonoBehaviour {
                 if ((((avg[0] - avg[1]) / 1000) >= 0) && chg)
                 {
                     moment += (1.0f * ((avg[0] - avg[1]) / 10));
+                    isMoving = true;
                 }
                 else
+                {
                     moment = variables.getMinSpeed();
+                    isMoving = false;
+                }
                 if ((avg[0] - avg[1] < 1))
                 {
                     System.DateTime time = speedTime[0];
@@ -107,6 +118,7 @@ public class PerformanceCalculator : MonoBehaviour {
                 avg.Clear();
             }
             SpeedCalc();
+            UpdateText();
         }
     }
 
@@ -182,7 +194,6 @@ public class PerformanceCalculator : MonoBehaviour {
         way += Mathf.Sqrt(x * x + z * z);
         SpeedRise();
         TimeAdd();
-        UpdateText();
     }
 
     public void UpdateText()
@@ -200,9 +211,8 @@ public class PerformanceCalculator : MonoBehaviour {
     void Power()
     {
         power = variables.getTensity() * variables.getCapacity();   //mWh
-        print(power);
-        curPower = power * 60 * 60; //mWs
-        //print("curPower: " + curPower);
+        curPower = power * 60 * 60 / accumulator; //mWs
+        //print("power: "+power*60*60+" curPower: " + curPower);
     }
 
     void PowerInput()
@@ -210,27 +220,47 @@ public class PerformanceCalculator : MonoBehaviour {
         float F = (variables.getMotorPower() * 0.9f * 1000) / variables.getMaxSpeed();    // mN
         float minTime = power / (variables.getMotorPower() * 1000);
         float P = F * speed;        //felvett teljesítmény mW-ban
-        if(P > 0)
+        if ((P > 0) && isMoving)
+        {
             curPower -= P;
-        curPowerPercent = (curPower / (power * (60 * 60))) * 100;
+            curPowerPercent = (curPower / (power * (60 * 60))) * 100;
+        }
         if (curPowerPercent < 0.0f)
             curPowerPercent = 0.0f;
         //print("power: "+power+" F:" + F + " P: " + P + " curPower: " + curPower);
     }
     
-    public void CheckCharging()
+    public bool CheckCharging()
     {
-        float x = 0.0f, z = 0.0f;
+        //float x = 0.0f, z = 0.0f;
         Vector3 curPos = new Vector3(transform.position.x, 0.0f, transform.position.z);
-        x = Mathf.Abs(curPos.x - charger.GetPosition().x);
+        /*x = Mathf.Abs(curPos.x - charger.GetPosition().x);
         z = Mathf.Abs(curPos.z - charger.GetPosition().z);
         float distence = Mathf.Sqrt(x * x + z * z);
-
+        */
         if (curPowerPercent < 20.0f)
+        {
             haveToCharge = true;
-        else
+        }
+        else if (curPowerPercent > 98.9f)
+        {
             haveToCharge = false;
-        print(haveToCharge);
+            charger.SetPosnonHere();
+        }
+        if (((curPos.x >= charger.GetPosition().x - 1)||(curPos.x >= charger.GetPosition().x + 1)) && ((curPos.x >= charger.GetPosition().x - 1) || (curPos.z >= charger.GetPosition().z + 1)))
+        {
+            curPower += charger.AddCharge()*60*60*Time.deltaTime;
+            if (curPower > power * 60 * 60)
+                curPower = power * 60 * 60;
+            curPowerPercent = (curPower / (power * (60 * 60))) * 100;
+            charger.SetPosHere();
+        }
+        return haveToCharge;
+    }
+
+    public Vector3 returnChargerPos()
+    {
+        return charger.GetPosition();
     }
 
 }

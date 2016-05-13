@@ -49,92 +49,100 @@ public class ProtocolClient : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         controller.setMovementSpeed(recentlyPerformance.getSpeed());
-        if (run)
+        if (!recentlyPerformance.CheckCharging())
         {
-            uploadSensorDataToServer();
-
-            //ha nem( útra várás || targetre várás || nincs elérhető target)
-            if (!(pathRequestPending || targetRequestPending || !targetSuccess))
+            if (run)
             {
-                //ha nem indulás
-                if (path != null)
+                uploadSensorDataToServer();
+
+                //ha nem( útra várás || targetre várás || nincs elérhető target)
+                if (!(pathRequestPending || targetRequestPending || !targetSuccess))
                 {
-
-                    //ha új target van
-                    if (!target.Equals(lastTarget))
+                    //ha nem indulás
+                    if (path != null)
                     {
-                        getNewPath(target);
-                        lastTarget = target;
-                    }
-                    //ha nincs új target
-                    else {
-                        //ha rossz a jelenlegi út 
-                        if (!checkPath())
+
+                        //ha új target van
+                        if (!target.Equals(lastTarget))
                         {
-                            if (wrongPosition())
-                            {
-                                rescue();
-                            }
-                            if (!pathSuccess)
-                            {
-                                getNewTarget(); //ha nem létezik út a jelenlegi célhoz
-                            }
-                            else {
-                                getNewPath(path[path.Count - 1]); //ha létezik út a jelenlegi célhoz
-                            }
+                            getNewPath(target);
+                            lastTarget = target;
                         }
-                        //ha jó a jelenlegi út
+                        //ha nincs új target
                         else {
-
-                            controller.moveTo(path[currentWaypoint].worldPosition);
-                            recentlyPerformance.AddPositions(transform.position);
-
-                            //ha elértük az aktuális waypointot
-                            if (waypointReached())
+                            //ha rossz a jelenlegi út 
+                            if (!checkPath())
                             {
-                                //ha az elért pont a target
-                                if (path.Count.Equals(currentWaypoint + 1))
+                                if (wrongPosition())
                                 {
-                                    getNewTarget();
-                                    recentlyPerformance.TimeAdd();
-                                    recentlyPerformance.ClearLists();
+                                    rescue();
+                                }
+                                if (!pathSuccess)
+                                {
+                                    getNewTarget(); //ha nem létezik út a jelenlegi célhoz
                                 }
                                 else {
-                                    currentWaypoint++;
-                                    controller.moveTo(path[currentWaypoint].worldPosition);
-                                    recentlyPerformance.AddPositions(transform.position);
-                                    recentlyPerformance.ClearLists();
+                                    getNewPath(path[path.Count - 1]); //ha létezik út a jelenlegi célhoz
+                                }
+                            }
+                            //ha jó a jelenlegi út
+                            else {
+
+                                controller.moveTo(path[currentWaypoint].worldPosition);
+                                recentlyPerformance.AddPositions(transform.position);
+
+                                //ha elértük az aktuális waypointot
+                                if (waypointReached())
+                                {
+                                    //ha az elért pont a target
+                                    if (path.Count.Equals(currentWaypoint + 1))
+                                    {
+                                        getNewTarget();
+                                        recentlyPerformance.TimeAdd();
+                                        recentlyPerformance.ClearLists();
+                                    }
+                                    else {
+                                        currentWaypoint++;
+                                        controller.moveTo(path[currentWaypoint].worldPosition);
+                                        recentlyPerformance.AddPositions(transform.position);
+                                        recentlyPerformance.ClearLists();
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                //ha indulás
-                else {
-                    //ha van már target
-                    if (target != null)
-                    {
-                        getNewPath(target);
-                        lastTarget = target;
-                    }
-                    //ha még nincs target
+                    //ha indulás
                     else {
-                        if (dataSent)
-                            getNewTarget();
+                        //ha van már target
+                        if (target != null)
+                        {
+                            getNewPath(target);
+                            lastTarget = target;
+                        }
+                        //ha még nincs target
+                        else {
+                            if (dataSent)
+                                getNewTarget();
+                        }
+                    }
+                }
+                //ha nincs elérhető target
+                if (!targetSuccess)
+                {
+                    //ha nem hívtunk még új target-et   
+                    if (!waitAndNewTargetCalled)
+                    {
+                        waitAndNewTargetCalled = true;
+                        //5mp várás, utána új target keresése
+                        StartCoroutine(WaitAndNewPath(5));
                     }
                 }
             }
-            //ha nincs elérhető target
-            if (!targetSuccess)
-            {
-                //ha nem hívtunk még új target-et   
-                if (!waitAndNewTargetCalled)
-                {
-                    waitAndNewTargetCalled = true;
-                    //5mp várás, utána új target keresése
-                    StartCoroutine(WaitAndNewPath(5));
-                }
-            }
+        }
+        else
+        {
+            controller.moveTo(recentlyPerformance.returnChargerPos());
+            recentlyPerformance.AddPositions(transform.position);
         }
 	}
 
